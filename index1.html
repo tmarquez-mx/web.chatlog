@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatLog - Documentación Inteligente para Investigación con IA</title>
+    <style>
+        /* --- Estilos CSS --- */
+        :root {
+            --primary-color: #2f008b; /* Morado del logo */
+            --accent-color: #ffba28; /* Amarillo/Naranja del logo */
+            --text-dark: #333;
+            --text-light: #555;
+            --bg-white: #ffffff;
+            --bg-light: #f8f9fa;
+            --border-color: #dee2e6;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text-dark);
+            background-color: var(--bg-white);
+            font-size: 16px; /* Base font size */
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1140px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        /* --- Header --- */
+        header {
+            background-color: var(--bg-white);
+            padding: 15px 0;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: var(--shadow-sm);
+        }
+
+        header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-placeholder {
+            width: 150px; /* Ajusta según tu logo */
+            height: 40px;  /* Ajusta según tu logo */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed var(--primary-color);
+            color: var(--primary-color);
+            font-weight: bold;
+            font-size: 0.9em;
+            text-align: center;
+        }
+        /* Cuando añadas tu imagen: */
+        .logo img {
+             max-height: 40px; /* Ajusta */
+             width: auto;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 25px;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: var(--primary-color);
+            font-weight: 500;
+            transition: color 0.3s ease;
+            font-size: 0.95em;
+        }
+
+        nav a:hover, nav a.active {
+            color: var(--accent-color);
+            /* text-decoration: underline; */
+        }
+
+        /* --- Hero Section --- */
+        .hero {
+            background: linear-gradient(135deg, var(--primary-color), #5a2abf); /* Gradiente sutil */
+            color: var(--bg-white);
+            padding: 80px 0 60px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before { /* Elemento decorativo */
+            content: '';
+            position: absolute;
+            bottom: -50px;
+            left: -50px;
+            width: 150px;
+            height: 150px;
+            background-color: rgba(255, 186, 40, 0.1); /* Accent color transparente */
+            border-radius: 50%;
+            opacity: 0.5;
+        }
+        .hero::after { /* Elemento decorativo */
+            content: '';
+            position: absolute;
+            top: -30px;
+            right: -30px;
+            width: 100px;
+            height: 100px;
+            background-color: rgba(255, 186, 40, 0.1); /* Accent color transparente */
+            border-radius: 50%;
+             opacity: 0.5;
+        }
+
+
+        .hero h1 {
+            font-size: 2.8rem; /* Tamaño grande */
+            font-weight: 700; /* Grueso */
+            margin-bottom: 15px;
+            line-height: 1.2;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero p.subtitle {
+            font-size: 1.2rem; /* Tamaño mediano */
+            font-weight: 300; /* Más ligero */
+            margin-bottom: 30px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            opacity: 0.9;
+             position: relative;
+             z-index: 1;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background-color: var(--accent-color);
+            color: var(--primary-color); /* Contraste fuerte */
+            padding: 12px 30px;
+            border-radius: 50px; /* Muy redondeado */
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.1rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border: none;
+            cursor: pointer;
+             position: relative;
+             z-index: 1;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+
+        /* --- Secciones Generales --- */
+        section {
+            padding: 70px 0;
+        }
+
+        section:nth-child(even) {
+            background-color: var(--bg-light);
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .section-title h2 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            position: relative;
+            display: inline-block;
+        }
+         /* Línea decorativa bajo el título */
+        .section-title h2::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 3px;
+            background-color: var(--accent-color);
+            margin: 10px auto 0;
+        }
+
+
+        .section-title p {
+            font-size: 1.1rem;
+            color: var(--text-light);
+            max-width: 650px;
+            margin: 0 auto;
+            font-weight: 300;
+        }
+
+        /* --- Qué es ChatLog --- */
+        #que-es .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            align-items: center;
+        }
+
+        #que-es .text-content h3 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+
+        #que-es .text-content p {
+            margin-bottom: 15px;
+            color: var(--text-light);
+        }
+
+        .main-screenshot-placeholder {
+             width: 100%;
+             height: 350px; /* Ajusta */
+             background-color: #eee;
+             border-radius: 8px;
+             display: flex;
+             align-items: center;
+             justify-content: center;
+             border: 2px dashed var(--border-color);
+             color: var(--text-light);
+             font-weight: bold;
+             text-align: center;
+             box-shadow: var(--shadow-md);
+        }
+
+        /* --- Frase Destacada / Slogan --- */
+        .slogan-highlight {
+            background-color: var(--primary-color);
+            color: var(--bg-white);
+            text-align: center;
+            padding: 35px 20px;
+            margin: 40px 0;
+            border-radius: 8px;
+            font-size: 1.3rem;
+            font-weight: 300;
+            font-style: italic;
+            box-shadow: var(--shadow-md);
+        }
+        .slogan-highlight strong {
+             color: var(--accent-color);
+             font-weight: 600; /* O 700 */
+        }
+
+        /* --- Características / Por qué usarlo --- */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 35px;
+        }
+
+        .feature-card {
+            background-color: var(--bg-white);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: var(--shadow-md);
+            border-left: 5px solid var(--primary-color); /* Borde distintivo */
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+
+         .feature-card .icon-placeholder { /* Placeholder para icono */
+             width: 50px;
+             height: 50px;
+             background-color: var(--accent-color);
+             color: var(--primary-color);
+             border-radius: 50%;
+             display: flex;
+             align-items: center;
+             justify-content: center;
+             margin-bottom: 20px;
+             font-size: 1.5rem;
+             font-weight: bold;
+             /* Reemplazar con tu <img> o icono real */
+         }
+
+        .feature-card h4 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            /* margin-top: 20px; */ /* Si no usas icono */
+        }
+
+        .feature-card p {
+            font-size: 0.95rem;
+            color: var(--text-light);
+        }
+        .feature-card .slogan-inline {
+             display: block;
+             margin-top: 15px;
+             font-style: italic;
+             font-weight: 500; /* Más grueso */
+             color: var(--primary-color);
+             font-size: 1rem;
+        }
+
+
+        /* --- Sección Capturas de Pantalla --- */
+        .screenshots-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .screenshot-item {
+            text-align: center;
+        }
+
+        .screenshot-placeholder {
+            width: 100%;
+            height: 200px; /* Ajusta */
+            background-color: #eee;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--border-color);
+            color: var(--text-light);
+            font-size: 0.9em;
+             box-shadow: var(--shadow-sm);
+             transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .screenshot-placeholder:hover {
+             transform: scale(1.03);
+             box-shadow: var(--shadow-md);
+        }
+        .screenshot-item img { /* Estilo para la imagen real */
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+         .screenshot-item img:hover {
+             transform: scale(1.03);
+             box-shadow: var(--shadow-md);
+         }
+
+
+        .screenshot-item p {
+            font-weight: 500;
+            color: var(--primary-color);
+        }
+
+        /* --- Manual de Usuario (Accordion) --- */
+        .accordion {
+            max-width: 800px;
+            margin: 40px auto 0;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden; /* Para que el borde redondeado funcione */
+             box-shadow: var(--shadow-sm);
+        }
+
+        .accordion-item {
+            border-bottom: 1px solid var(--border-color);
+        }
+        .accordion-item:last-child {
+            border-bottom: none;
+        }
+
+        .accordion-header {
+            background-color: var(--bg-white);
+            padding: 15px 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.3s ease;
+        }
+
+        .accordion-header:hover {
+            background-color: var(--bg-light);
+        }
+
+        .accordion-header h5 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin: 0;
+        }
+
+        .accordion-icon {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            transition: transform 0.3s ease;
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-out, padding 0.4s ease-out;
+            background-color: var(--bg-light);
+            padding: 0 20px;
+        }
+
+        .accordion-content p,
+        .accordion-content ul,
+        .accordion-content ol {
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+            color: var(--text-light);
+        }
+        .accordion-content ul,
+        .accordion-content ol {
+            padding-left: 25px; /* Indentación listas */
+        }
+         .accordion-content code {
+             background-color: #e9ecef;
+             padding: 2px 5px;
+             border-radius: 3px;
+             font-family: monospace;
+             font-size: 0.9em;
+         }
+
+        .accordion-item.active .accordion-content {
+            max-height: 1000px; /* Un valor grande para permitir cualquier contenido */
+            padding: 20px 20px;
+            transition: max-height 0.5s ease-in, padding 0.5s ease-in;
+        }
+
+        .accordion-item.active .accordion-header {
+            background-color: var(--bg-light); /* Ligeramente diferente cuando activo */
+        }
+        .accordion-item.active .accordion-icon {
+            transform: rotate(45deg);
+        }
+
+        /* --- Footer CTA --- */
+        #final-cta {
+            background-color: var(--accent-color);
+            text-align: center;
+        }
+        #final-cta .section-title h2 {
+            color: var(--primary-color);
+        }
+         #final-cta .section-title p {
+             color: var(--primary-color);
+              opacity: 0.8;
+         }
+         #final-cta .cta-button {
+              background-color: var(--primary-color);
+              color: var(--bg-white);
+         }
+         #final-cta .cta-button:hover {
+             background-color: #1e005c; /* Morado más oscuro */
+         }
+
+
+        /* --- Footer --- */
+        footer {
+            background-color: var(--primary-color);
+            color: rgba(255, 255, 255, 0.7);
+            text-align: center;
+            padding: 25px 0;
+            font-size: 0.9em;
+        }
+
+        /* --- Responsive Design --- */
+        @media (max-width: 992px) {
+            .hero h1 { font-size: 2.4rem; }
+            .hero p.subtitle { font-size: 1.1rem; }
+            .section-title h2 { font-size: 2rem; }
+             #que-es .content { grid-template-columns: 1fr; gap: 30px; }
+             #que-es .text-content { text-align: center; }
+             .main-screenshot-placeholder { height: 300px; margin-top: 20px; }
+             .features-grid { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+        }
+
+        @media (max-width: 768px) {
+             body { font-size: 15px; }
+            header .container { flex-direction: column; gap: 10px; }
+            nav ul { gap: 15px; justify-content: center; flex-wrap: wrap;}
+            .hero { padding: 60px 0 40px; }
+            .hero h1 { font-size: 2rem; }
+            .hero p.subtitle { font-size: 1rem; }
+            .cta-button { font-size: 1rem; padding: 10px 25px; }
+            section { padding: 50px 0; }
+            .section-title h2 { font-size: 1.8rem; }
+            .section-title p { font-size: 1rem; }
+            .slogan-highlight { font-size: 1.15rem; padding: 25px 15px;}
+            .features-grid { grid-template-columns: 1fr; gap: 25px; } /* Una columna */
+             .feature-card { padding: 25px; }
+             .screenshots-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+             .accordion { max-width: 100%; }
+             .accordion-header h5 { font-size: 1rem; }
+             .accordion-content p, .accordion-content ul, .accordion-content ol { font-size: 0.9rem;}
+        }
+
+         @media (max-width: 576px) {
+              .hero h1 { font-size: 1.8rem; }
+              .hero p.subtitle { font-size: 0.9rem; }
+              .section-title h2 { font-size: 1.6rem; }
+              .section-title p { font-size: 0.95rem; }
+              .slogan-highlight { font-size: 1.05rem;}
+              .screenshots-grid { grid-template-columns: 1fr; } /* Una columna siempre */
+              .screenshot-placeholder { height: 180px; }
+         }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="container">
+            <div class="logo">
+                <!-- LOGO AQUÍ: Reemplaza este div con tu etiqueta <img> -->
+                <!-- Ejemplo: <img src="path/to/your/logo.png" alt="ChatLog Logo"> -->
+                <div class="logo-placeholder">ChatLog Logo</div>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#que-es" class="active">Qué es</a></li>
+                    <li><a href="#por-que">Por qué usarlo</a></li>
+                    <li><a href="#capturas">Capturas</a></li>
+                    <li><a href="#manual">Manual</a></li>
+                    <li><a href="#obtener">Obtener</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero" id="inicio">
+        <div class="container">
+            <h1>Revoluciona tu Investigación con IA, Documentada Paso a Paso</h1>
+            <p class="subtitle">ChatLog es la extensión de navegador diseñada para académicos que utilizan Modelos de Lenguaje Grandes (LLMs), permitiendo un registro meticuloso, gestión eficiente y declaración transparente.</p>
+            <a href="#obtener" class="cta-button">Obtén ChatLog Ahora (Gratis)</a>
+             <!-- Podrías añadir una imagen/visual principal aquí si quieres -->
+        </div>
+    </section>
+
+    <section id="que-es">
+        <div class="container">
+            <div class="section-title">
+                <h2>¿Qué es ChatLog?</h2>
+                <p>Tu bitácora digital indispensable para la investigación asistida por IA.</p>
+            </div>
+            <div class="content">
+                <div class="text-content">
+                    <h3>Una Herramienta Esencial para el Investigador Moderno</h3>
+                    <p>ChatLog es una extensión para navegadores web (como Chrome, Firefox, Edge) creada específicamente para investigadores, estudiantes y académicos que interactúan con herramientas de Inteligencia Artificial como ChatGPT, Claude, Gemini y otros LLMs.</p>
+                    <p>Su propósito principal es facilitar un <strong>registro detallado y sistemático</strong> de cada interacción, promoviendo la rigurosidad metodológica, la transparencia y la reproducibilidad en un campo en constante evolución.</p>
+                    <p>Más que una simple nota, ChatLog te permite organizar tus diálogos con IA dentro de proyectos, añadir contexto crucial como la finalidad, la versión del modelo, prompts exactos, y reflexiones éticas o sobre sesgos.</p>
+                    <div class="slogan-highlight">
+                       <strong>ChatLog:</strong> Tu cuaderno de campo para la era de la IA.
+                    </div>
+                </div>
+                <div class="visual-content">
+                     <!-- CAPTURA PRINCIPAL AQUÍ: Reemplaza este div con tu etiqueta <img> -->
+                     <!-- Ejemplo: <img src="path/to/main-screenshot.png" alt="Vista principal de ChatLog"> -->
+                    <div class="main-screenshot-placeholder">Captura de Pantalla Principal de ChatLog</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="por-que" class="features">
+        <div class="container">
+            <div class="section-title">
+                <h2>¿Por Qué Usar ChatLog?</h2>
+                <p>Simplifica tu flujo de trabajo, asegura la calidad de tu investigación y cumple con las exigencias académicas.</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                     <div class="icon-placeholder">R</div> <!-- Icono Placeholder: Registro -->
+                    <h4>Registro Detallado y Contextualizado</h4>
+                    <p>Guarda no solo el prompt, sino también el propósito, el modelo LLM específico (¡y su versión!), enlaces, calificaciones de utilidad, notas éticas y de sesgo. ¡Nunca pierdas el contexto de tus interacciones!</p>
+                     <p class="slogan-inline">ChatLog: Cada interacción cuenta. Cada registro simplifica.</p>
+                </div>
+                <div class="feature-card">
+                     <div class="icon-placeholder">P</div> <!-- Icono Placeholder: Proyectos -->
+                    <h4>Gestión Eficiente por Proyectos</h4>
+                    <p>Organiza tus interacciones en proyectos de investigación distintos. Filtra y accede rápidamente a los registros relevantes para cada trabajo, manteniendo tu investigación ordenada y enfocada.</p>
+                </div>
+                 <div class="feature-card">
+                     <div class="icon-placeholder">D</div> <!-- Icono Placeholder: Declaración -->
+                    <h4>Declaración de Uso Simplificada</h4>
+                    <p>Genera automáticamente declaraciones de uso de LLMs en diversos formatos (Estándar, Detallado, APA) seleccionando los registros pertinentes. Cumple fácilmente con los requisitos de transparencia y buenas prácticas.</p>
+                     <p class="slogan-inline">ChatLog: Registra hoy, publica con confianza mañana.</p>
+                </div>
+                 <div class="feature-card">
+                     <div class="icon-placeholder">E</div> <!-- Icono Placeholder: Estadísticas -->
+                    <h4>Análisis y Estadísticas de Uso</h4>
+                    <p>Visualiza patrones en tu uso de LLMs: qué modelos usas más, para qué finalidades, tu actividad a lo largo del tiempo y las etiquetas más comunes. Obtén insights sobre tu propio proceso de investigación.</p>
+                </div>
+                 <div class="feature-card">
+                     <div class="icon-placeholder">✓</div> <!-- Icono Placeholder: Ética -->
+                    <h4>Foco en la Ética y Mitigación de Sesgos</h4>
+                    <p>Campos dedicados para anotar consideraciones éticas y estrategias de mitigación de riesgos/sesgos en cada interacción. Fomenta una reflexión activa y documentada sobre el uso responsable de la IA.</p>
+                </div>
+                 <div class="feature-card">
+                     <div class="icon-placeholder">⇄</div> <!-- Icono Placeholder: Import/Export -->
+                    <h4>Portabilidad de Datos (Importar/Exportar)</h4>
+                    <p>Tus datos te pertenecen. Exporta fácilmente todos tus registros y proyectos en formatos estándar (JSON, CSV) para copias de seguridad, análisis externo o migración. También puedes importar datos.</p>
+                     <p class="slogan-inline">ChatLog: Menos tiempo documentando, más tiempo investigando.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+     <section id="capturas">
+        <div class="container">
+            <div class="section-title">
+                <h2>ChatLog en Acción</h2>
+                <p>Un vistazo rápido a las principales funcionalidades de la extensión.</p>
+            </div>
+            <div class="screenshots-grid">
+                <div class="screenshot-item">
+                    <!-- CAPTURA PESTAÑA PRINCIPAL/PROYECTOS AQUÍ -->
+                    <div class="screenshot-placeholder">Vista Pestaña Proyectos</div>
+                    <p>Registro y Gestión de Proyectos</p>
+                </div>
+                <div class="screenshot-item">
+                     <!-- CAPTURA PESTAÑA DECLARACIÓN AQUÍ -->
+                    <div class="screenshot-placeholder">Vista Pestaña Declaración</div>
+                    <p>Generación de Declaración de Uso</p>
+                </div>
+                <div class="screenshot-item">
+                    <!-- CAPTURA PESTAÑA HERRAMIENTAS AQUÍ -->
+                    <div class="screenshot-placeholder">Vista Pestaña Herramientas</div>
+                    <p>Importación, Exportación y Gestión Avanzada</p>
+                </div>
+                <div class="screenshot-item">
+                     <!-- CAPTURA PESTAÑA ESTADÍSTICAS AQUÍ -->
+                    <div class="screenshot-placeholder">Vista Pestaña Estadísticas</div>
+                    <p>Visualización de Estadísticas de Uso</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <section id="manual">
+        <div class="container">
+            <div class="section-title">
+                <h2>Manual de Usuario Rápido</h2>
+                <p>Comienza a usar ChatLog en pocos minutos.</p>
+            </div>
+            <div class="accordion">
+                <div class="accordion-item">
+                    <div class="accordion-header">
+                        <h5>1. Instalación y Acceso</h5>
+                        <span class="accordion-icon">+</span>
+                    </div>
+                    <div class="accordion-content">
+                        <p><strong>Instalación:</strong></p>
+                        <ol>
+                            <li>Ve a la tienda de extensiones de tu navegador (Chrome Web Store, Firefox Add-ons, etc.).</li>
+                            <li>Busca "ChatLog" (o el nombre final de tu extensión).</li>
+                            <li>Haz clic en "Añadir a [Navegador]" y confirma los permisos (<code>storage</code> para guardar datos, <code>sidePanel</code> para la interfaz, <code>downloads</code> para exportar).</li>
+                        </ol>
+                        <p><strong>Acceso:</strong></p>
+                        <ul>
+                            <li>Una vez instalada, busca el icono de ChatLog en la barra de herramientas de tu navegador (puede estar dentro del menú de extensiones).</li>
+                            <li>Haz clic en el icono para abrir el panel lateral de ChatLog.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                 <div class="accordion-item">
+                    <div class="accordion-header">
+                        <h5>2. Pestaña Principal: Proyectos y Registros</h5>
+                        <span class="accordion-icon">+</span>
+                    </div>
+                    <div class="accordion-content">
+                        <p>Esta es tu área de trabajo principal.</p>
+                        <p><strong>Gestión de Proyectos:</strong></p>
+                        <ul>
+                            <li>Usa el campo "Nombre del nuevo proyecto" y el botón "Crear Proyecto" para organizar tu trabajo.</li>
+                            <li>Selecciona un proyecto del desplegable para asociar nuevos registros o para filtrar la lista de "Acceso Rápido".</li>
+                            <li>Puedes eliminar un proyecto seleccionado (¡cuidado, esto no se deshace!) usando el botón "Eliminar Proyecto". Los registros asociados pasarán a "Sin Proyecto".</li>
+                         </ul>
+                         <p><strong>Nuevo Registro / Editar Registro:</strong></p>
+                         <ul>
+                             <li>Rellena el formulario con los detalles de tu interacción con el LLM. Los campos marcados con * son obligatorios.</li>
+                             <li><strong>Finalidad:</strong> Selecciona una de la lista o elige "Otro" y especifica.</li>
+                             <li><strong>Etiquetas:</strong> Escribe etiquetas y presiona Enter o coma para añadirlas. Puedes eliminar etiquetas haciendo clic en la 'x'.</li>
+                             <li><strong>Calificación:</strong> Haz clic en las estrellas para valorar la utilidad de la respuesta del LLM.</li>
+                             <li>Haz clic en "Guardar Registro".</li>
+                         </ul>
+                         <p><strong>Acceso Rápido:</strong></p>
+                         <ul>
+                             <li>Muestra los últimos 10 registros guardados o actualizados (filtrados por el proyecto seleccionado arriba).</li>
+                             <li>Haz clic en un registro de esta lista para cargarlo en el formulario y editarlo.</li>
+                         </ul>
+                    </div>
+                </div>
+
+                 <div class="accordion-item">
+                    <div class="accordion-header">
+                        <h5>3. Pestaña Declaración de Uso</h5>
+                        <span class="accordion-icon">+</span>
+                    </div>
+                    <div class="accordion-content">
+                        <p>Genera un reporte formal del uso de LLMs para tus publicaciones o informes.</p>
+                        <ol>
+                            <li><strong>Filtrar (Opcional):</strong> Selecciona un proyecto específico si deseas incluir solo registros de ese proyecto.</li>
+                            <li><strong>Seleccionar Registros:</strong> Marca las casillas de los registros que quieres incluir en la declaración. Puedes usar "Seleccionar Todos" / "Deseleccionar Todos" para los registros visibles.</li>
+                            <li><strong>Configurar Opciones:</strong> Elige el formato deseado (Estándar, Detallado, etc.), añade tu nombre/institución si quieres, y decide si incluir prompts, enlaces y fechas.</li>
+                            <li><strong>Generar:</strong> Haz clic en "Generar Declaración". El texto aparecerá en la vista previa.</li>
+                            <li><strong>Usar Declaración:</strong> Copia el texto al portapapeles o descárgalo como archivo .txt.</li>
+                        </ol>
+                    </div>
+                </div>
+
+                 <div class="accordion-item">
+                    <div class="accordion-header">
+                        <h5>4. Pestaña Herramientas</h5>
+                        <span class="accordion-icon">+</span>
+                    </div>
+                    <div class="accordion-content">
+                        <p>Gestiona tus datos y proyectos de forma avanzada.</p>
+                         <p><strong>Exportar Datos:</strong></p>
+                         <ul>
+                            <li><strong>Exportar Todo (JSON):</strong> Crea un archivo de respaldo completo con todos tus proyectos y registros. Ideal para copias de seguridad o transferir a otro dispositivo.</li>
+                            <li><strong>Exportar Registros (CSV):</strong> Guarda solo los registros en formato CSV, útil para análisis en hojas de cálculo.</li>
+                        </ul>
+                         <p><strong>Importar Datos:</strong></p>
+                         <ul>
+                            <li><strong>Importar JSON:</strong> Restaura datos desde un archivo de respaldo JSON previamente exportado. Te preguntará si quieres fusionar con los datos existentes o reemplazarlos por completo.</li>
+                            <li><strong>Importar CSV:</strong> Añade registros desde un archivo CSV. Se intentará mapear las columnas automáticamente. Los registros importados se añadirán a los existentes (no reemplaza).</li>
+                        </ul>
+                        <p><strong>Edición/Borrado de Proyectos:</strong></p>
+                        <ul>
+                           <li>Visualiza todos tus proyectos en una tabla.</li>
+                           <li>Usa los botones "Editar" para cambiar el nombre de un proyecto o "Eliminar" para borrarlo permanentemente (afecta a los registros asociados como se describió antes).</li>
+                        </ul>
+                         <p><strong>Edición/Borrado de Registros:</strong></p>
+                        <ul>
+                           <li>Visualiza todos tus registros, agrupados por proyecto.</li>
+                            <li>Puedes filtrar por proyecto y ordenar por diferentes criterios.</li>
+                            <li>Haz clic en el encabezado de un proyecto para expandir/colapsar sus registros.</li>
+                           <li>Usa los botones "Editar" (te llevará al formulario en la pestaña principal) o "Eliminar" para gestionar registros individuales.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                 <div class="accordion-item">
+                    <div class="accordion-header">
+                        <h5>5. Pestaña Estadísticas</h5>
+                        <span class="accordion-icon">+</span>
+                    </div>
+                    <div class="accordion-content">
+                        <p>Obtén una visión general de cómo utilizas los LLMs.</p>
+                        <ul>
+                            <li><strong>Resumen General:</strong> Tarjetas con el número total de interacciones, modelos distintos, proyectos y finalidades registradas.</li>
+                            <li><strong>Filtros:</strong> Puedes filtrar las estadísticas por período de tiempo, proyecto específico o modelo LLM. Haz clic en "Aplicar Filtros" para actualizar las visualizaciones. "Restablecer" quita los filtros.</li>
+                            <li><strong>Visualizaciones:</strong>
+                                <ul>
+                                    <li>Tablas de modelos, finalidades y proyectos más usados (con barras de porcentaje).</li>
+                                    <li>Cronología de actividad (interacciones por día).</li>
+                                    <li>Nube de etiquetas más frecuentes (el tamaño indica la frecuencia).</li>
+                                </ul>
+                            </li>
+                        </ul>
+                        <p>Estas estadísticas se basan en los datos que has registrado en ChatLog.</p>
+                    </div>
+                </div>
+
+            </div> <!-- Fin Accordion -->
+        </div>
+    </section>
+
+     <section id="obtener" class="final-cta">
+         <div class="container">
+             <div class="section-title">
+                 <h2>Listo para Optimizar tu Investigación con IA?</h2>
+                 <p>Instala ChatLog hoy mismo y empieza a documentar tus interacciones de forma inteligente.</p>
+             </div>
+             <!-- CTA Button -->
+             <!-- Idealmente, este botón enlazaría a la tienda de extensiones -->
+             <a href="#" class="cta-button">Descargar Extensión (Próximamente)</a>
+             <p style="margin-top: 15px; font-size: 0.9em; color: var(--primary-color); opacity: 0.7;">Gratuito y de código abierto (¡si aplica!)</p>
+         </div>
+     </section>
+
+
+    <footer>
+        <div class="container">
+            <p>© 2024 ChatLog. Todos los derechos reservados (o licencia Open Source si aplica).</p>
+            <!-- Puedes añadir más enlaces aquí si quieres -->
+        </div>
+    </footer>
+
+    <script>
+        // --- JavaScript para el Accordion ---
+        const accordionItems = document.querySelectorAll('.accordion-item');
+
+        accordionItems.forEach(item => {
+            const header = item.querySelector('.accordion-header');
+            const content = item.querySelector('.accordion-content');
+            const icon = item.querySelector('.accordion-icon');
+
+            header.addEventListener('click', () => {
+                // Cerrar otros items abiertos (opcional)
+                // accordionItems.forEach(otherItem => {
+                //    if (otherItem !== item && otherItem.classList.contains('active')) {
+                //        otherItem.classList.remove('active');
+                //        otherItem.querySelector('.accordion-content').style.maxHeight = null;
+                //        otherItem.querySelector('.accordion-content').style.padding = '0 20px';
+                 //       otherItem.querySelector('.accordion-icon').textContent = '+';
+                 //   }
+                // });
+
+                // Abrir/Cerrar el item actual
+                const isActive = item.classList.toggle('active');
+
+                if (isActive) {
+                     // El padding se maneja con la clase 'active' en CSS
+                     content.style.maxHeight = content.scrollHeight + 40 + "px"; // +40 para el padding top/bottom
+                    icon.textContent = '-';
+                } else {
+                    content.style.maxHeight = null;
+                     // El padding se maneja con la clase 'active' en CSS
+                    icon.textContent = '+';
+                }
+            });
+        });
+
+         // --- JavaScript para Navegación Activa (Opcional) ---
+         // Resalta el enlace de navegación actual al hacer scroll
+        const navLinks = document.querySelectorAll('nav a');
+        const sections = document.querySelectorAll('section[id]'); // Selecciona secciones con ID
+
+        function changeNavOnScroll() {
+            let currentSection = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                 // Activar un poco antes de llegar a la sección superior exacta
+                 if (pageYOffset >= sectionTop - sectionHeight / 3) {
+                    currentSection = section.getAttribute('id');
+                 }
+            });
+
+             navLinks.forEach(link => {
+                 link.classList.remove('active');
+                 // Comprobar si el href del link (sin #) coincide con la sección actual
+                 if (link.getAttribute('href').substring(1) === currentSection) {
+                     link.classList.add('active');
+                 }
+             });
+              // Caso especial para el inicio si estamos muy arriba
+              if (pageYOffset < 200 && !currentSection) {
+                   const homeLink = document.querySelector('nav a[href="#inicio"]') || document.querySelector('nav a[href="#que-es"]');
+                   if(homeLink) homeLink.classList.add('active');
+              }
+
+
+        }
+         // Ejecutar al cargar y al hacer scroll
+         window.addEventListener('scroll', changeNavOnScroll);
+         window.addEventListener('load', changeNavOnScroll); // Para estado inicial
+
+    </script>
+
+</body>
+</html>
