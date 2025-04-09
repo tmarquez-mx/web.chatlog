@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatLog Demo - Herramienta Académica para LLMs</title>
+    <!-- Google Font: Poppins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-color: #2f008b;
+            --primary-darker: #24006b; /* For hover */
+            --accent-color: #ffba28;
+            --accent-darker: #f0ae26; /* For hover */
+            --text-dark: #212529;
+            --text-medium: #495057;
+            --text-light: #6c757d;
+            --bg-white: #ffffff;
+            --bg-light-gray: #f8f9fa; /* Lighter background */
+            --bg-medium-gray: #e9ecef; /* Slightly darker gray */
+            --border-light: #dee2e6;
+            --border-medium: #ced4da;
+            --danger-color: #dc3545;
+            --success-color: #198754;
+            --info-color: #0dcaf0;
+            --star-active: var(--accent-color);
+            --star-hover: #ffd700;
+            --star-default: #adb5bd;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --font-sans: 'Poppins', sans-serif;
+            --border-radius-sm: 0.25rem;
+            --border-radius-md: 0.5rem;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            color: var(--text-dark);
+            background-color: var(--bg-white);
+            font-size: 16px; /* Base font size */
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .container {
+            max-width: 1200px; /* Slightly wider container */
+            margin: 0 auto;
+            padding: 2rem 1.5rem; /* More padding */
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 0.8em;
+            line-height: 1.3;
+        }
+
+        h1 { font-size: 2.5rem; font-weight: 700; }
+        h2 { font-size: 2rem; font-weight: 600; margin-bottom: 1.5em; }
+        h3 { font-size: 1.5rem; font-weight: 600; }
+        h4 { font-size: 1.2rem; font-weight: 500; }
+
+        p {
+            margin-bottom: 1.2rem;
+            color: var(--text-medium);
+        }
+        a {
+            color: var(--primary-darker);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+        a:hover {
+            color: var(--accent-color);
+        }
+
+        /* --- Header --- */
+        .app-header {
+            background-color: var(--bg-white);
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border-light);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-sm);
+        }
+        .app-header .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+        }
+        .app-logo img {
+            height: 45px; /* Slightly smaller */
+            width: auto;
+            vertical-align: middle;
+        }
+        .app-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-left: 0.75rem;
+        }
+        .storage-info {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            background-color: var(--bg-light-gray);
+            padding: 0.3rem 0.6rem;
+            border-radius: var(--border-radius-sm);
+        }
+
+        /* --- Slogan Styling --- */
+        .slogan {
+             font-size: 1.1rem;
+             font-style: italic;
+             font-weight: 300; /* Lighter weight */
+             color: var(--text-medium);
+             text-align: center;
+             margin: 2rem auto;
+             max-width: 600px;
+             padding: 0.5rem 0;
+             border-top: 1px solid var(--border-light);
+             border-bottom: 1px solid var(--border-light);
+        }
+
+        /* --- Tabs --- */
+        .tab-navigation {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--border-light);
+            flex-wrap: wrap;
+            padding: 0 0.5rem;
+        }
+        .tab-button {
+            background-color: transparent;
+            color: var(--text-medium);
+            padding: 0.8rem 1.2rem;
+            border: none;
+            border-bottom: 3px solid transparent; /* Placeholder for active border */
+            border-radius: 0;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 1rem;
+            transition: color 0.2s ease, border-color 0.2s ease;
+            margin-bottom: -2px; /* Overlap the container border */
+        }
+        .tab-button:hover {
+            color: var(--primary-color);
+        }
+        .tab-button.active {
+            color: var(--primary-color);
+            font-weight: 600;
+            border-bottom-color: var(--accent-color);
+        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* --- Sections --- */
+        .section {
+            background-color: var(--bg-light-gray);
+            border: 1px solid var(--border-light);
+            border-radius: var(--border-radius-md);
+            margin-bottom: 2rem;
+            padding: 2rem; /* More padding inside sections */
+            box-shadow: var(--shadow-sm);
+        }
+        .section h2 { /* Section titles */
+            font-size: 1.6rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-medium);
+            color: var(--primary-darker);
+        }
+        .section h3 { font-size: 1.3rem; margin-bottom: 1rem; color: var(--primary-darker); }
+        .section h4 { font-size: 1.1rem; margin-bottom: 0.8rem; }
+
+        /* --- Forms --- */
+        .form-group { margin-bottom: 1.3rem; }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-dark);
+            font-size: 0.95rem;
+        }
+        input[type="text"],
+        input[type="url"],
+        input[type="file"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 0.75rem 1rem; /* More padding */
+            border: 1px solid var(--border-medium);
+            border-radius: var(--border-radius-sm);
+            background-color: var(--bg-white);
+            font-family: inherit;
+            font-size: 1rem; /* Consistent size */
+            color: var(--text-dark);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        input[type="text"]:focus,
+        input[type="url"]:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(47, 0, 139, 0.2);
+        }
+        textarea { min-height: 100px; resize: vertical; }
+        input[type="file"] {
+            padding: 0.5rem 1rem; /* Adjust padding for file input */
+            background-color: var(--bg-light-gray);
+        }
+         input::placeholder, textarea::placeholder {
+             color: var(--text-light);
+             font-weight: 300;
+             font-style: italic;
+         }
+
+        /* Checkboxes */
+         .checkbox-group label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            font-weight: 400; /* Normal weight */
+         }
+         input[type="checkbox"] {
+            width: auto; /* Override width 100% */
+            margin-right: 0.3rem;
+            accent-color: var(--primary-color); /* Color the checkmark */
+            transform: scale(1.1);
+         }
+
+
+        /* Buttons */
+        button, .button { /* Add .button class for link styling */
+            display: inline-block; /* Allows margin/padding */
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: var(--border-radius-sm);
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 1rem;
+            text-align: center;
+            transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+            box-shadow: var(--shadow-sm);
+        }
+        button:active, .button:active {
+             transform: translateY(1px);
+             box-shadow: none;
+        }
+        /* Primary Button */
+        button[type="submit"],
+        #add-project-btn, #import-data-btn, #import-csv-btn,
+        #generate-declaration-btn, #apply-stats-filters-btn, #save-project-edit-btn,
+        #save-record-btn {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        button[type="submit"]:hover,
+        #add-project-btn:hover, #import-data-btn:hover, #import-csv-btn:hover,
+        #generate-declaration-btn:hover, #apply-stats-filters-btn:hover, #save-project-edit-btn:hover,
+        #save-record-btn:hover {
+            background-color: var(--primary-darker);
+            box-shadow: var(--shadow-md);
+        }
+        /* Secondary/Accent Button */
+        #select-all-records-btn, #deselect-all-records-btn,
+        #copy-declaration-btn, #download-declaration-btn,
+        #export-all-btn, #export-csv-btn, .edit-btn {
+            background-color: var(--accent-color);
+            color: var(--primary-darker); /* Dark text on yellow */
+        }
+        #select-all-records-btn:hover, #deselect-all-records-btn:hover,
+        #copy-declaration-btn:hover, #download-declaration-btn:hover,
+        #export-all-btn:hover, #export-csv-btn:hover, .edit-btn:hover {
+            background-color: var(--accent-darker);
+            box-shadow: var(--shadow-md);
+        }
+        /* Light/Cancel Button */
+        #cancel-edit-btn, #reset-stats-filters-btn, #cancel-project-edit-btn,
+        .delete-btn {
+            background-color: var(--bg-medium-gray);
+            color: var(--text-medium);
+            box-shadow: none;
+        }
+        #cancel-edit-btn:hover, #reset-stats-filters-btn:hover, #cancel-project-edit-btn:hover,
+        .delete-btn:hover {
+            background-color: var(--border-medium);
+             color: var(--text-dark);
+        }
+         /* Danger Delete Button Specific */
+         #delete-project-btn, .delete-btn {
+             background-color: #f8d7da; /* Light red */
+             color: var(--danger-color);
+             box-shadow: none;
+         }
+         #delete-project-btn:hover, .delete-btn:hover {
+             background-color: var(--danger-color);
+             color: white;
+         }
+
+
+        button:disabled {
+            background-color: var(--border-medium);
+            color: var(--text-light);
+            cursor: not-allowed;
+            opacity: 0.7;
+            box-shadow: none;
+             transform: none;
+        }
+        .form-actions {
+            margin-top: 1.5rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+        }
+
+        /* --- Specific Element Styles --- */
+
+        /* Project Controls */
+        .project-controls { display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end; }
+        .project-controls select { min-width: 200px; flex-grow: 1; }
+        .project-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; flex-grow: 2; }
+        .project-actions input { flex-grow: 1; min-width: 150px; }
+
+        /* Quick Access List */
+        #quick-access-list ul { list-style-type: none; padding: 0; }
+        #quick-access-list li {
+            padding: 0.8rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: var(--border-radius-sm);
+            background-color: var(--bg-white);
+            box-shadow: var(--shadow-sm);
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid transparent; /* Add subtle left border */
+        }
+        #quick-access-list li:hover {
+            background-color: var(--bg-light-gray);
+            transform: translateX(3px);
+            border-left-color: var(--accent-color);
+        }
+        .list-rating { color: var(--star-active); font-size: 0.9em; white-space: nowrap; }
+
+        /* Tags System */
+        .tags-container {
+            border: 1px solid var(--border-medium); border-radius: var(--border-radius-sm);
+            padding: 0.5rem 0.75rem; background-color: var(--bg-white);
+            display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; min-height: 50px; position: relative;
+        }
+        #tags-list { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+        .tag-item {
+            background-color: var(--primary-color); color: white; padding: 0.2rem 0.7rem;
+            border-radius: 1rem; font-size: 0.85rem; display: flex; align-items: center; gap: 0.3rem;
+        }
+        .tag-remove { cursor: pointer; font-weight: bold; opacity: 0.7; transition: opacity 0.2s; }
+        .tag-remove:hover { opacity: 1; }
+        #tags-input { flex: 1; min-width: 150px; border: none; outline: none; padding: 0.3rem 0; background: transparent; font-size: 1rem; }
+        .tags-suggestions {
+            position: absolute; background-color: white; border: 1px solid var(--border-light);
+            border-radius: var(--border-radius-sm); max-height: 200px; overflow-y: auto;
+            width: calc(100% - 2px); box-shadow: var(--shadow-md); z-index: 10; display: none;
+            left: 0; top: 100%; margin-top: 4px;
+        }
+        .suggestion-item { padding: 0.6rem 1rem; cursor: pointer; font-size: 0.9rem; }
+        .suggestion-item:hover, .suggestion-item.active { background-color: var(--bg-light-gray); }
+        .suggestion-item strong { color: var(--primary-darker); font-weight: 600; }
+
+        /* Rating System */
+        .rating-container { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+        .star-rating { display: inline-flex; }
+        .star { font-size: 1.8rem; color: var(--star-default); cursor: pointer; transition: color 0.1s, transform 0.1s; padding: 0 2px; }
+        .star:hover, .star.hover { color: var(--star-hover); transform: scale(1.1); }
+        .star.active { color: var(--star-active); }
+        .rating-text { color: var(--text-light); font-style: italic; font-size: 0.9rem; }
+
+        /* Declaration Page */
+        .filter-controls { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; margin-bottom: 1.5rem; }
+        .records-list {
+            max-height: 350px; overflow-y: auto; border: 1px solid var(--border-light);
+            border-radius: var(--border-radius-sm); margin-top: 1rem; background-color: var(--bg-white);
+        }
+        .record-item { padding: 0.7rem 1rem; border-bottom: 1px solid var(--border-light); display: flex; align-items: center; gap: 0.8rem; }
+        .record-item:last-child { border-bottom: none; }
+        .record-item:hover { background-color: #fdf8eb; /* Lighter accent hover */ }
+        .record-info { flex: 1; overflow: hidden; }
+        .record-title { font-weight: 500; display: flex; align-items: center; gap: 0.5rem; }
+        .record-details { color: var(--text-light); font-size: 0.8rem; margin-top: 0.1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+        .declaration-options { margin-top: 1.5rem; }
+        .declaration-preview {
+            width: 100%; min-height: 200px; max-height: 450px; padding: 1rem;
+            background-color: var(--bg-white); border: 1px solid var(--border-medium);
+            border-radius: var(--border-radius-sm); white-space: pre-wrap; font-family: monospace;
+            overflow: auto; margin-bottom: 1rem; font-size: 0.9em; line-height: 1.5;
+        }
+
+        /* Tools Page */
+        .import-tabs { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 2rem; }
+        .import-tab { flex: 1; min-width: 280px; border: 1px solid var(--border-light); padding: 1.5rem; border-radius: var(--border-radius-md); background: white; }
+        .csv-preview-container { margin-top: 1.5rem; border: 1px solid var(--border-light); border-radius: var(--border-radius-md); padding: 1.5rem; background-color: var(--bg-white); }
+        .csv-preview { width: 100%; overflow-x: auto; max-height: 300px; }
+        .csv-preview table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        .csv-preview th, .csv-preview td { border: 1px solid var(--border-light); padding: 0.5rem 0.8rem; text-align: left; white-space: nowrap; }
+        .csv-preview th { background-color: var(--bg-light-gray); font-weight: 600; }
+
+        /* Tables (Project/Record Management & Stats) */
+        .table-container { overflow-x: auto; } /* Add scroll for tables */
+        .data-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        .data-table th, .data-table td { padding: 0.8rem 1rem; text-align: left; border-bottom: 1px solid var(--border-light); vertical-align: middle; }
+        .data-table thead th {
+            background-color: var(--bg-light-gray); font-weight: 600; color: var(--primary-darker);
+            position: sticky; top: 0; z-index: 1; /* Sticky header */
+            border-top: 1px solid var(--border-light);
+             font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .data-table tbody tr:hover { background-color: #fdf8eb; }
+        .data-table .action-buttons { display: flex; gap: 0.5rem; }
+        .data-table .action-buttons button { padding: 0.3rem 0.6rem; font-size: 0.85rem; }
+        td.no-data-message { text-align: center !important; color: var(--text-light); padding: 2rem; font-style: italic; }
+
+        /* Project/Record Management Specific */
+        .records-management-filters { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; }
+        .filter-group { flex: 1; min-width: 200px; }
+        .records-list-container { max-height: 600px; overflow-y: auto; border: 1px solid var(--border-light); border-radius: var(--border-radius-sm); background: white; }
+        .project-group { border-bottom: 1px solid var(--border-medium); }
+        .project-group:last-child { border-bottom: none; }
+        .project-header { padding: 0.8rem 1rem; background-color: var(--bg-light-gray); display: flex; justify-content: space-between; align-items: center; cursor: pointer; border-bottom: 1px solid var(--border-light); }
+        .project-header:hover { background-color: var(--bg-medium-gray); }
+        .project-name { font-weight: 600; color: var(--primary-darker); }
+        .project-count { font-size: 0.9em; color: var(--text-light); }
+        .project-records { display: none; background-color: white; }
+        .project-records.expanded { display: block; }
+        .record-row { display: flex; padding: 0.8rem 1rem; border-bottom: 1px solid var(--border-light); align-items: center; gap: 1rem; }
+        .record-row:last-child { border-bottom: none; }
+        .record-row:hover { background-color: #fdf8eb; }
+        .record-row .record-info { flex: 1; min-width: 0; }
+        .record-row .record-name { font-weight: 500; display: flex; align-items: center; gap: 0.5rem; word-break: break-word; }
+        .record-row .record-details { font-size: 0.8em; color: var(--text-light); margin-top: 0.2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .record-row .record-actions { display: flex; gap: 0.5rem; }
+        .edit-form { margin-top: 1.5rem; padding: 1.5rem; border: 1px solid var(--primary-color); border-radius: var(--border-radius-md); background-color: var(--bg-white); }
+
+
+        /* Stats Page */
+        .stats-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .stat-card { background-color: var(--bg-white); border-radius: var(--border-radius-md); padding: 1.5rem; box-shadow: var(--shadow-md); text-align: center; border-top: 4px solid var(--primary-color); transition: transform 0.2s; }
+        .stat-card:hover { transform: translateY(-4px); }
+        .stat-value { font-size: 2.8rem; font-weight: 700; color: var(--primary-color); margin-bottom: 0.3rem; line-height: 1; }
+        .stat-label { color: var(--text-light); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stats-filter-controls { display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end; margin-bottom: 2rem; }
+        .stats-tables-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 2rem; margin-bottom: 2rem; }
+        .stats-table-container { background-color: var(--bg-white); border-radius: var(--border-radius-md); padding: 1.5rem; box-shadow: var(--shadow-md); }
+        .stats-table-container h3 { margin-top: 0; border-bottom: 1px solid var(--border-light); padding-bottom: 0.8rem; }
+        .stats-table td:nth-child(1) { word-break: break-word; }
+        .stats-table td:nth-child(2), .stats-table td:nth-child(3) { text-align: right; white-space: nowrap; }
+        .progress-bar { height: 18px; background-color: var(--bg-medium-gray); border-radius: 9px; overflow: hidden; position: relative; width: 100%; min-width: 80px; }
+        .progress-fill { height: 100%; border-radius: 9px; transition: width 0.6s ease-out; background-color: var(--primary-color); }
+        /* Timeline */
+        .timeline-container { width: 100%; padding: 1rem 0; max-height: 400px; overflow-y: auto; border: 1px solid var(--border-light); border-radius: var(--border-radius-sm); background-color: var(--bg-white); }
+        .timeline-item { display: flex; margin-bottom: 0.5rem; align-items: center; padding: 0 1rem; }
+        .timeline-date { width: 110px; flex-shrink: 0; font-weight: 400; font-size: 0.85em; color: var(--text-light); text-align: right; margin-right: 0.8rem; }
+        .timeline-bar-container { flex-grow: 1; height: 20px; position: relative; background-color: var(--bg-light-gray); border-radius: 10px; }
+        .timeline-bar { height: 100%; background-color: var(--accent-color); border-radius: 10px; position: relative; color: var(--primary-darker); display: flex; align-items: center; justify-content: flex-end; font-size: 0.75rem; font-weight: 600; overflow: hidden; white-space: nowrap; min-width: 25px; padding-right: 0.5rem; transition: width 0.4s ease; }
+        /* Tags Cloud */
+        .tags-cloud { display: flex; flex-wrap: wrap; gap: 0.8rem 1.2rem; padding: 1.5rem; justify-content: center; align-items: center; min-height: 150px; background-color: var(--bg-white); border-radius: var(--border-radius-sm); border: 1px solid var(--border-light); }
+        .tag-cloud-item { display: inline-block; padding: 0.4rem 1rem; border-radius: 1.5rem; background-color: var(--primary-color); color: white; transition: transform 0.2s, background-color 0.2s; line-height: 1.3; }
+        .tag-cloud-item:hover { transform: scale(1.05); background-color: var(--primary-darker); }
+
+
+        /* Utility Classes */
+        .text-muted { color: var(--text-light); font-size: 0.9em; }
+        .no-data-message { text-align: center; color: var(--text-light); font-style: italic; padding: 2rem; width: 100%; }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            h1 { font-size: 2rem; }
+            h2 { font-size: 1.7rem; }
+            h3 { font-size: 1.3rem; }
+            .container { padding: 1.5rem 1rem; }
+            .app-header .container { flex-direction: column; gap: 0.5rem; }
+            .storage-info { margin-top: 0.5rem; }
+            .tab-navigation { justify-content: center; }
+            .tab-button { padding: 0.6rem 0.8rem; font-size: 0.9rem; }
+            .project-controls, .project-actions { flex-direction: column; align-items: stretch; }
+            .project-controls select { min-width: unset; }
+            .stats-summary { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem; }
+            .stat-value { font-size: 2.2rem; }
+            .stats-tables-grid { grid-template-columns: 1fr; gap: 1.5rem; }
+            .record-row { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+            .record-row .record-actions { margin-top: 0.5rem; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <header class="app-header">
+        <div class="container">
+             <div style="display: flex; align-items: center;">
+                <!-- **INSTRUCCIÓN:** Ruta relativa. Asegúrate de que la imagen esté en la misma carpeta o ajusta la ruta (ej. "images/chatlog-logo.png") -->
+                <img src="chatlog-logo.png" alt="ChatLog Logo" class="app-logo">
+                <span class="app-title">ChatLog Demo</span>
+            </div>
+            <span id="storage-usage" class="storage-info">Uso: 0KB / 5MB</span>
+        </div>
+    </header>
+
+    <main class="container">
+
+        <p class="slogan">ChatLog: Tu cuaderno de campo para la era de la IA.</p>
+
+        <!-- Navegación por Pestañas -->
+        <nav class="tab-navigation">
+            <button class="tab-button active" data-tab="main">Proyectos y Registro</button>
+            <button class="tab-button" data-tab="declaration">Declaración de Uso</button>
+            <button class="tab-button" data-tab="tools">Herramientas</button>
+            <button class="tab-button" data-tab="stats">Estadísticas</button>
+        </nav>
+
+        <!-- Contenido de las Pestañas -->
+        <div class="tab-content-container">
+
+            <!-- ===== Pestaña Proyectos y Registro (Principal) ===== -->
+            <section id="main" class="tab-content active">
+
+                <div class="section">
+                    <h2>Gestión de Proyectos</h2>
+                    <div class="project-controls">
+                        <select id="project-select" aria-label="Seleccionar proyecto para filtrar registros">
+                            <option value="all">-- Mostrar Todos los Registros --</option>
+                            <option value="none">-- Registros Sin Proyecto --</option>
+                        </select>
+                        <div class="project-actions">
+                            <input type="text" id="new-project-name" placeholder="Nombre del nuevo proyecto" aria-label="Nombre del nuevo proyecto">
+                            <button id="add-project-btn">Crear Proyecto</button>
+                            <button id="delete-project-btn" disabled>Eliminar Proyecto Seleccionado</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2 id="form-title">Nuevo Registro</h2>
+                    <form id="record-form" novalidate>
+                        <input type="hidden" id="record-id">
+
+                        <div class="form-group">
+                            <label for="interaction-name">Nombre de la Interacción *</label>
+                            <input type="text" id="interaction-name" required placeholder="Título descriptivo (ej: Revisión abstract art. X)">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="purpose">Finalidad de la Interacción *</label>
+                            <select id="purpose" required>
+                                <option value="">-- Selecciona una finalidad --</option>
+                                <option value="Análisis de documentos">Análisis de documentos</option>
+                                <option value="Asistencia en programación">Asistencia en programación</option>
+                                <option value="Creación de presentaciones">Creación de presentaciones</option>
+                                <option value="Generación de texto">Generación de texto</option>
+                                <option value="Ideación y brainstorming">Ideación y brainstorming</option>
+                                <option value="Investigación bibliográfica">Investigación bibliográfica</option>
+                                <option value="Planificación de proyectos">Planificación de proyectos</option>
+                                <option value="Resumen de información">Resumen de información</option>
+                                <option value="Revisión de escritura">Revisión de escritura</option>
+                                <option value="Traducción de contenido">Traducción de contenido</option>
+                                <option value="Otro">Otro (especificar abajo)</option>
+                            </select>
+                            <div id="other-purpose-container" style="display:none; margin-top: 0.8rem;">
+                                <input type="text" id="other-purpose" placeholder="Especificar otra finalidad">
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                            <div class="form-group">
+                                <label for="llm-name">Nombre del LLM *</label>
+                                <input type="text" id="llm-name" required placeholder="Ej: ChatGPT, Claude, Gemini">
+                            </div>
+                            <div class="form-group">
+                                <label for="llm-version">Versión del LLM</label>
+                                <input type="text" id="llm-version" placeholder="Ej: 4o, 3.5 Sonnet, 1.5 Pro">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="prompt">Prompt Principal *</label>
+                            <textarea id="prompt" required rows="5" placeholder="Pega aquí el prompt más relevante utilizado..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="interaction-link">Enlace a la Interacción (Opcional)</label>
+                            <input type="url" id="interaction-link" placeholder="URL de la conversación (si está disponible)">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="tags-input">Etiquetas / Palabras Clave</label>
+                            <div class="tags-container">
+                                <div id="tags-list"></div>
+                                <input type="text" id="tags-input" placeholder="Escribe y presiona Enter o coma...">
+                                <div id="tags-suggestions" class="tags-suggestions"></div>
+                            </div>
+                            <input type="hidden" id="tags">
+                        </div>
+
+                         <div class="form-group">
+                            <label>Calificación de la Utilidad</label>
+                            <div class="rating-container">
+                                <div class="star-rating" aria-label="Calificación de 1 a 5 estrellas">
+                                    <span class="star" data-rating="1" role="button" aria-label="1 estrella">★</span>
+                                    <span class="star" data-rating="2" role="button" aria-label="2 estrellas">★</span>
+                                    <span class="star" data-rating="3" role="button" aria-label="3 estrellas">★</span>
+                                    <span class="star" data-rating="4" role="button" aria-label="4 estrellas">★</span>
+                                    <span class="star" data-rating="5" role="button" aria-label="5 estrellas">★</span>
+                                </div>
+                                <div class="rating-text">Sin calificar</div>
+                                <input type="hidden" id="rating-value" value="0">
+                            </div>
+                        </div>
+
+                        <h4>Notas Adicionales (Opcional)</h4>
+                        <div class="form-group">
+                            <label for="ethical-notes">Consideraciones Éticas</label>
+                            <textarea id="ethical-notes" rows="3" placeholder="¿Hubo algún sesgo? ¿Se verificó la información? ¿Privacidad?..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="bias-notes">Mitigación de Riesgos/Sesgos</label>
+                            <textarea id="bias-notes" rows="3" placeholder="¿Qué estrategias se usaron para minimizar sesgos o errores?..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="observations">Otras Observaciones</label>
+                            <textarea id="observations" rows="3" placeholder="Resultados inesperados, ideas para futuros prompts, etc..."></textarea>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" id="save-record-btn">Guardar Registro</button>
+                            <button type="button" id="cancel-edit-btn" style="display:none;">Cancelar Edición</button>
+                        </div>
+                    </form>
+                </div>
+
+                <p class="slogan">ChatLog: Cada interacción cuenta. Cada registro simplifica.</p>
+
+                <div class="section">
+                    <h2>Acceso Rápido (Últimos 10 Registros)</h2>
+                    <div id="quick-access-list">
+                        <p id="no-records-message" class="no-data-message">Aún no hay registros. ¡Crea el primero!</p>
+                        <ul id="recent-records"></ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== Pestaña Declaración de Uso ===== -->
+            <section id="declaration" class="tab-content">
+                 <div class="section">
+                    <h2>Generar Declaración de Uso de LLMs</h2>
+                    <p>Selecciona los registros relevantes y genera un texto listo para incluir en tus publicaciones o reportes metodológicos.</p>
+                </div>
+
+                 <div class="section">
+                    <h3>1. Selección de Registros</h3>
+                    <div class="filter-controls">
+                        <label for="declaration-project-select">Filtrar por Proyecto:</label>
+                        <select id="declaration-project-select" aria-label="Filtrar registros por proyecto">
+                            <option value="all">Todos los Proyectos</option>
+                            <option value="none">Sin Proyecto</option>
+                        </select>
+                        <button id="select-all-records-btn">Seleccionar Todos</button>
+                        <button id="deselect-all-records-btn">Deseleccionar Todos</button>
+                    </div>
+                    <div id="records-container">
+                        <p id="no-declaration-records-message" class="no-data-message">No hay registros disponibles.</p>
+                        <div id="records-list" class="records-list"></div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>2. Opciones de Formato</h3>
+                    <div class="declaration-options" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+                         <div>
+                             <div class="form-group">
+                                <label for="declaration-format">Formato de Declaración:</label>
+                                <select id="declaration-format">
+                                    <option value="standard">Estándar (Detallado por proyecto)</option>
+                                    <option value="detailed">Muy Detallado (Incluye todo)</option>
+                                    <option value="minimal">Mínimo (Resumen conciso)</option>
+                                    <option value="apa">Estilo APA (Sugerido)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="researcher-name">Nombre Investigador/a (Opcional):</label>
+                                <input type="text" id="researcher-name" placeholder="Tu nombre">
+                            </div>
+                            <div class="form-group">
+                                <label for="institution-name">Institución (Opcional):</label>
+                                <input type="text" id="institution-name" placeholder="Nombre de tu institución">
+                            </div>
+                        </div>
+                        <div>
+                             <h4>Incluir en la Declaración:</h4>
+                            <div class="form-group checkbox-group"> <label> <input type="checkbox" id="include-prompts" checked> Incluir prompts </label> </div>
+                            <div class="form-group checkbox-group"> <label> <input type="checkbox" id="include-links" checked> Incluir enlaces </label> </div>
+                            <div class="form-group checkbox-group"> <label> <input type="checkbox" id="include-dates" checked> Incluir fechas </label> </div>
+                         </div>
+                     </div>
+                     <div class="form-actions" style="margin-top: 1rem;">
+                        <button id="generate-declaration-btn">Generar Declaración</button>
+                    </div>
+                </div>
+
+                 <div class="section">
+                     <h3>3. Resultado</h3>
+                     <div class="declaration-preview-container">
+                        <label for="declaration-preview">Vista Previa:</label>
+                        <pre id="declaration-preview" class="declaration-preview" aria-live="polite">La declaración se mostrará aquí después de generarla.</pre>
+                        <div class="declaration-actions">
+                            <button id="copy-declaration-btn">Copiar al Portapapeles</button>
+                            <button id="download-declaration-btn">Descargar como TXT</button>
+                        </div>
+                    </div>
+                </div>
+
+                 <p class="slogan">ChatLog: Registra hoy, publica con confianza mañana.</p>
+
+            </section>
+
+            <!-- ===== Pestaña Herramientas ===== -->
+            <section id="tools" class="tab-content">
+                 <div class="section">
+                    <h2>Herramientas de Gestión</h2>
+                    <p>Administra tus proyectos, registros y datos de ChatLog.</p>
+                </div>
+
+                <div class="section">
+                    <h3>Exportar Datos</h3>
+                    <p>Crea copias de seguridad o transfiere tus datos.</p>
+                    <div class="form-actions">
+                        <button id="export-all-btn">Exportar Todo (JSON)</button>
+                        <button id="export-csv-btn">Exportar Registros (CSV)</button>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>Importar Datos</h3>
+                    <p>Restaura datos desde archivos de respaldo.</p>
+                    <div class="import-tabs">
+                        <div class="import-tab">
+                             <h4>Desde JSON (Backup Completo)</h4>
+                            <div class="form-group">
+                                <label for="import-file">Seleccionar archivo <code>.json</code>:</label>
+                                <input type="file" id="import-file" accept=".json">
+                            </div>
+                             <div class="form-actions">
+                                <button id="import-data-btn" disabled>Importar JSON</button>
+                            </div>
+                        </div>
+                        <div class="import-tab">
+                             <h4>Desde CSV (Añadir Registros)</h4>
+                            <div class="form-group">
+                                <label for="csv-file">Seleccionar archivo <code>.csv</code>:</label>
+                                <input type="file" id="csv-file" accept=".csv, text/csv">
+                            </div>
+                             <div class="csv-preview-container" id="csv-preview-container" style="display: none;">
+                                <h5>Vista previa (primeras 5 filas):</h5>
+                                <div class="csv-preview" id="csv-preview"></div>
+                            </div>
+                             <div class="form-actions" style="margin-top: 1rem;">
+                                <button id="import-csv-btn" disabled>Importar CSV</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                 <p class="slogan">ChatLog: Menos tiempo documentando, más tiempo investigando.</p>
+
+
+                 <div class="section">
+                    <h3>Gestión Avanzada de Proyectos</h3>
+                     <p>Edita nombres o elimina proyectos completos. La eliminación de un proyecto NO borra sus registros asociados (quedarán como "Sin proyecto").</p>
+                     <div class="table-container">
+                        <table class="data-table" id="projects-management-table">
+                            <thead>
+                                <tr>
+                                    <th>Nombre del Proyecto</th>
+                                    <th>Fecha Creación</th>
+                                    <th>Registros</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Se llenará dinámicamente -->
+                                <tr><td colspan="4" class="no-data-message">Cargando proyectos...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                     <!-- Formulario de edición (oculto) -->
+                    <div id="edit-project-form" class="edit-form" style="display: none;">
+                        <h4>Editar Nombre del Proyecto</h4>
+                        <input type="hidden" id="edit-project-id">
+                        <div class="form-group">
+                            <label for="edit-project-name">Nuevo nombre:</label>
+                            <input type="text" id="edit-project-name" required>
+                        </div>
+                        <div class="form-actions">
+                            <button id="save-project-edit-btn">Guardar Cambios</button>
+                            <button id="cancel-project-edit-btn" type="button">Cancelar</button>
+                        </div>
+                    </div>
+                 </div>
+
+
+                 <div class="section">
+                    <h3>Gestión Avanzada de Registros</h3>
+                    <p>Revisa, edita o elimina registros individuales.</p>
+                     <div class="records-management-filters">
+                        <div class="filter-group">
+                            <label for="records-project-filter">Filtrar por Proyecto:</label>
+                            <select id="records-project-filter" aria-label="Filtrar lista de registros por proyecto">
+                                <option value="all">Todos los Proyectos</option>
+                                <!-- Opciones añadidas por JS -->
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="records-sort-by">Ordenar por:</label>
+                            <select id="records-sort-by" aria-label="Ordenar lista de registros">
+                                <option value="date-desc">Fecha (Más Reciente)</option>
+                                <option value="date-asc">Fecha (Más Antigua)</option>
+                                <option value="rating-desc">Calificación (Mayor)</option>
+                                <option value="rating-asc">Calificación (Menor)</option>
+                                <option value="name">Nombre (A-Z)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="records-list-container">
+                        <div id="records-by-project" class="records-by-project">
+                            <div class="no-data-message">Cargando registros...</div>
+                        </div>
+                    </div>
+                 </div>
+
+
+            </section>
+
+            <!-- ===== Pestaña Estadísticas ===== -->
+            <section id="stats" class="tab-content">
+                <div class="section">
+                    <h2>Estadísticas de Uso</h2>
+                    <p>Visualiza tus patrones de interacción con LLMs.</p>
+                 </div>
+
+                 <!-- Resumen General -->
+                <div class="stats-summary">
+                    <div class="stat-card"> <div class="stat-value" id="total-interactions">0</div> <div class="stat-label">Interacciones</div> </div>
+                    <div class="stat-card"> <div class="stat-value" id="total-models">0</div> <div class="stat-label">Modelos Usados</div> </div>
+                    <div class="stat-card"> <div class="stat-value" id="total-projects">0</div> <div class="stat-label">Proyectos Activos</div> </div>
+                    <div class="stat-card"> <div class="stat-value" id="total-purposes">0</div> <div class="stat-label">Finalidades</div> </div>
+                </div>
+
+                <!-- Filtros -->
+                <div class="section">
+                    <h3>Filtrar Estadísticas</h3>
+                    <div class="stats-filter-controls">
+                        <div class="form-group">
+                            <label for="stats-date-range">Período:</label>
+                            <select id="stats-date-range">
+                                <option value="all">Todo el tiempo</option>
+                                <option value="month">Último mes</option>
+                                <option value="quarter">Último trimestre</option>
+                                <option value="year">Último año</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="stats-project-filter">Proyecto:</label>
+                            <select id="stats-project-filter">
+                                <option value="all">Todos los proyectos</option>
+                                <!-- Opciones añadidas por JS -->
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="stats-model-filter">Modelo LLM:</label>
+                            <select id="stats-model-filter">
+                                <option value="all">Todos los modelos</option>
+                                <!-- Opciones añadidas por JS -->
+                            </select>
+                        </div>
+                        <div class="form-actions">
+                            <button id="apply-stats-filters-btn">Aplicar Filtros</button>
+                            <button id="reset-stats-filters-btn" type="button">Restablecer</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tablas y Visualizaciones -->
+                <div class="stats-tables-grid">
+                    <div class="stats-table-container">
+                        <h3>Modelos Más Utilizados</h3>
+                         <div class="table-container">
+                            <table class="data-table stats-table" id="models-table">
+                                <thead><tr><th>Modelo</th><th>Usos</th><th>%</th><th>Distribución</th></tr></thead>
+                                <tbody><tr><td colspan="4" class="no-data-message">Calculando...</td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+                     <div class="stats-table-container">
+                        <h3>Finalidades Más Comunes</h3>
+                        <div class="table-container">
+                            <table class="data-table stats-table" id="purposes-table">
+                                <thead><tr><th>Finalidad</th><th>Usos</th><th>%</th><th>Distribución</th></tr></thead>
+                                <tbody><tr><td colspan="4" class="no-data-message">Calculando...</td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                 <div class="section">
+                     <h3>Distribución por Proyecto</h3>
+                     <div class="stats-table-container">
+                         <div class="table-container">
+                             <table class="data-table stats-table" id="projects-table-stats">
+                                <thead><tr><th>Proyecto</th><th>Interacciones</th><th>%</th><th>Distribución</th></tr></thead>
+                                <tbody><tr><td colspan="4" class="no-data-message">Calculando...</td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+                 </div>
+
+                 <div class="section">
+                    <h3>Actividad en el Tiempo (por Fecha de Creación)</h3>
+                    <div id="timeline-container" class="timeline-container">
+                        <div class="no-data-message">Calculando...</div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>Etiquetas Más Utilizadas</h3>
+                    <div id="tags-cloud" class="tags-cloud">
+                        <div class="no-data-message">Calculando...</div>
+                    </div>
+                </div>
+
+            </section>
+
+        </div> <!-- /.tab-content-container -->
+
+    </main>
+
+    <footer style="background-color: var(--primary-darker); color: #e0e0e0; text-align: center; padding: 2rem 1rem; margin-top: 3rem; font-size: 0.9rem;">
+        <p>&copy; 2024 ChatLog Demo. Una herramienta pensada para la academia.</p>
+         <p style="margin-top: 0.5rem;">"ChatLog: Rigor. Registro. Reporte."</p>
+         <!-- Puedes añadir enlaces a GitHub, contacto, etc. aquí -->
+    </footer>
+
+
+    <script>
+        // === CONTENIDO DE SCRIPT.JS (SIN CAMBIOS FUNCIONALES, PERO VERIFICADO) ===
+        // ... (Pega aquí TODO el contenido del script.js que proporcionaste anteriormente) ...
+        // ... Asegúrate de que las funciones que manipulan el DOM (getElementById, querySelector)
+        //     sigan funcionando con la nueva estructura HTML si hubo cambios mayores
+        //     (en este caso, los IDs y clases principales se mantuvieron, así que debería estar bien).
+        // === INICIO DEL CONTENIDO DE SCRIPT.JS ===
+        // Variables globales para el sistema de etiquetas
+        let allTags = [];
+        let currentTags = [];
+        // Variables para la declaración
+        let selectedRecords = [];
+
+        // Inicialización cuando el DOM está listo
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('ChatLog DEMO (v2) inicializando...'); // Modificado para demo
+
+            // Inicializar navegación por pestañas
+            initTabNavigation();
+
+            // Cargar datos iniciales
+            loadProjects(); // Carga proyectos en TODOS los selectores relevantes
+            loadQuickAccessList(); // Carga lista rápida inicial
+            updateStorageUsage(); // Muestra uso inicial
+
+            // Configurar event listeners para la interfaz
+            setupEventListeners();
+
+            // Inicializar sistemas específicos
+            initTagsSystem();
+            initOtherPurposeField();
+            initRatingSystem();
+
+             // Precargar estructuras de pestañas no activas (filtros, etc.)
+             preloadTabData();
+
+             // Forzar carga inicial de datos en pestañas si es necesario (ej. estadísticas)
+             if (document.getElementById('stats')?.classList.contains('active')) loadStatistics();
+             if (document.getElementById('declaration')?.classList.contains('active')) loadRecordsForDeclaration();
+             if (document.getElementById('tools')?.classList.contains('active')) {
+                 loadProjectsForManagement();
+                 loadRecordsForManagement();
+             }
+
+        });
+
+        // --- FUNCIONES PRINCIPALES ---
+
+        // Navegación por pestañas
+        function initTabNavigation() {
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const tabName = this.getAttribute('data-tab');
+                    console.log(`Cambiando a pestaña: ${tabName}`);
+
+                    // Desactivar todos los botones y contenido
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.remove('active'));
+
+                    // Activar el botón y contenido seleccionado
+                    this.classList.add('active');
+                    const activeContent = document.getElementById(tabName);
+                    if (activeContent) {
+                         activeContent.classList.add('active');
+                         // Forzar recarga de datos al activar la pestaña
+                         loadDataForTab(tabName);
+                    } else {
+                         console.error("Contenido de pestaña no encontrado:", tabName);
+                    }
+                });
+            });
+        }
+
+        // Carga datos específicos al activar una pestaña
+        function loadDataForTab(tabName) {
+             console.log(`Cargando datos para pestaña activa: ${tabName}`);
+             switch(tabName) {
+                case 'declaration':
+                    // loadDeclarationProjects(); // Ya poblado por loadProjects()
+                    loadRecordsForDeclaration(); // Recargar lista de registros
+                    break;
+                case 'stats':
+                    loadStatistics(); // Recalcular y mostrar estadísticas
+                    break;
+                case 'tools':
+                     // loadProjectsForManagement(); // Carga proyectos en tabla
+                     loadRecordsForManagement(); // Carga registros en tabla
+                    break;
+                 case 'main':
+                     // Recargar lista rápida según el filtro de proyecto actual
+                     loadQuickAccessList(document.getElementById('project-select')?.value || 'all');
+                     break;
+            }
+        }
+
+
+        // Precarga estructuras/filtros para pestañas no activas al inicio
+        function preloadTabData() {
+            console.log('Precargando estructuras de pestañas...');
+            // loadDeclarationProjects(); // Hecho por loadProjects()
+            // loadProjectsForManagement(); // Carga inicial de la tabla de proyectos en Herramientas
+            initRecordsManagementFilters(); // Solo inicializa filtros de registros en Herramientas
+            populateStatisticsFilters(); // Solo inicializa filtros de Estadísticas
+             // Cargar tabla de proyectos en herramientas
+             if(document.getElementById('projects-management-table')) {
+                  loadProjectsForManagement();
+             }
+        }
+
+
+        // Configurar todos los event listeners de la aplicación
+        function setupEventListeners() {
+             console.log('Configurando event listeners...');
+            // Pestaña Principal (Proyectos y Registro)
+            document.getElementById('add-project-btn')?.addEventListener('click', addProject);
+            document.getElementById('delete-project-btn')?.addEventListener('click', deleteProject);
+            document.getElementById('project-select')?.addEventListener('change', handleProjectSelection);
+            document.getElementById('record-form')?.addEventListener('submit', function(e) { e.preventDefault(); saveRecord(); });
+            document.getElementById('cancel-edit-btn')?.addEventListener('click', cancelEditRecord);
+
+            // Pestaña Declaración
+            document.getElementById('declaration-project-select')?.addEventListener('change', filterRecordsForDeclaration);
+            document.getElementById('select-all-records-btn')?.addEventListener('click', selectAllRecords);
+            document.getElementById('deselect-all-records-btn')?.addEventListener('click', deselectAllRecords);
+            document.getElementById('generate-declaration-btn')?.addEventListener('click', generateDeclaration);
+            document.getElementById('copy-declaration-btn')?.addEventListener('click', copyDeclarationToClipboard);
+            document.getElementById('download-declaration-btn')?.addEventListener('click', downloadDeclaration);
+
+            // Pestaña Estadísticas
+            document.getElementById('apply-stats-filters-btn')?.addEventListener('click', applyStatisticsFilters);
+            document.getElementById('reset-stats-filters-btn')?.addEventListener('click', resetStatisticsFilters);
+
+            // Pestaña Herramientas
+            document.getElementById('export-all-btn')?.addEventListener('click', exportAllData);
+            document.getElementById('export-csv-btn')?.addEventListener('click', exportCSV);
+            // Importación JSON
+            document.getElementById('import-file')?.addEventListener('change', () => {
+                const btn = document.getElementById('import-data-btn');
+                if(btn) btn.disabled = !document.getElementById('import-file').files.length;
+            });
+            document.getElementById('import-data-btn')?.addEventListener('click', importData);
+             if(document.getElementById('import-data-btn')) document.getElementById('import-data-btn').disabled = true; // Inicialmente deshabilitado
+            // Importación CSV
+            document.getElementById('csv-file')?.addEventListener('change', () => {
+                previewCSV(); // La preview habilitará el botón si es válida
+            });
+            document.getElementById('import-csv-btn')?.addEventListener('click', importCSV);
+             if(document.getElementById('import-csv-btn')) document.getElementById('import-csv-btn').disabled = true; // Inicialmente deshabilitado
+            // Gestión Avanzada Proyectos
+            document.getElementById('save-project-edit-btn')?.addEventListener('click', saveProjectEdit);
+            document.getElementById('cancel-project-edit-btn')?.addEventListener('click', cancelProjectEdit);
+             // Gestión Avanzada Registros
+            document.getElementById('records-project-filter')?.addEventListener('change', loadRecordsForManagement);
+            document.getElementById('records-sort-by')?.addEventListener('change', loadRecordsForManagement);
+
+             console.log('Event listeners configurados.');
+        }
+
+        // --- GESTIÓN DE ALMACENAMIENTO --- (Sin cambios funcionales)
+        function saveToStorage(key, data) { try { const jsonData = JSON.stringify(data); const currentUsage = calculateStorageUsage(); const newDataSize = jsonData.length * 2; const oldDataSize = (localStorage.getItem(key) || '').length * 2; const limit = 5 * 1024 * 1024; if (currentUsage - oldDataSize + newDataSize > limit) { alert('Error: No se pudo guardar. Se excedería el límite de almacenamiento local (5MB).'); console.error('Error al guardar: Límite de almacenamiento excedido.'); return false; } localStorage.setItem(key, jsonData); updateStorageUsage(); return true; } catch (error) { console.error('Error al guardar en localStorage:', error); if (error.name === 'QuotaExceededError' || error.code === 22 || error.code === 1014) { alert('Error al guardar: Almacenamiento local lleno (límite de 5MB).'); } else { alert('Error al guardar los datos. Es posible que el almacenamiento esté lleno o inaccesible.'); } return false; } }
+        function loadFromStorage(key) { try { const data = localStorage.getItem(key); return data ? JSON.parse(data) : null; } catch (error) { console.error(`Error al cargar ${key} del localStorage:`, error); return null; } }
+        function calculateStorageUsage() { let totalSize = 0; for (let i = 0; i < localStorage.length; i++) { const key = localStorage.key(i); const value = localStorage.getItem(key); if (key.startsWith('chatlog_')) { totalSize += (key.length + (value || '').length) * 2; } } return totalSize; }
+        function updateStorageUsage() { const usageElement = document.getElementById('storage-usage'); if (!usageElement) return; const totalSize = calculateStorageUsage(); let sizeText = ''; if (totalSize < 1024 * 1024) { sizeText = `${(totalSize / 1024).toFixed(1)}KB`; } else { sizeText = `${(totalSize / (1024 * 1024)).toFixed(1)}MB`; } usageElement.textContent = `Uso: ${sizeText} / 5MB`; const usageRatio = totalSize / (5 * 1024 * 1024); if (usageRatio > 0.9) { usageElement.style.color = 'var(--danger-color)'; usageElement.style.fontWeight = '600'; } else if (usageRatio > 0.7) { usageElement.style.color = 'var(--accent-darker)'; usageElement.style.fontWeight = '500'; } else { usageElement.style.color = 'var(--text-light)'; usageElement.style.fontWeight = '400'; } }
+
+        // --- GESTIÓN DE PROYECTOS --- (Lógica sin cambios, solo logging y referencias)
+        function loadProjects() { const projects = loadFromStorage('chatlog_projects') || []; console.log(`Cargando ${projects.length} proyectos en selectores...`); projects.sort((a, b) => a.name.localeCompare(b.name)); const selectors = [ document.getElementById('project-select'), document.getElementById('declaration-project-select'), document.getElementById('records-project-filter'), document.getElementById('stats-project-filter') ]; selectors.forEach(select => { if (!select) return; const currentSelectedValue = select.value; let defaultOptions = []; const hasNoneOption = Array.from(select.options).some(opt => opt.value === 'none'); if (select.id === 'project-select' || select.id === 'declaration-project-select') { defaultOptions = Array.from(select.options).slice(0, hasNoneOption ? 2 : 1); if (!hasNoneOption) { const noneOpt = document.createElement('option'); noneOpt.value = 'none'; noneOpt.textContent = '-- Registros Sin Proyecto --'; defaultOptions.push(noneOpt); } } else if (select.id === 'records-project-filter' || select.id === 'stats-project-filter') { defaultOptions.push(select.options[0]); if (!hasNoneOption) { const noneOpt = document.createElement('option'); noneOpt.value = 'none'; noneOpt.textContent = 'Sin proyecto'; defaultOptions.push(noneOpt); } else { defaultOptions.push(Array.from(select.options).find(opt => opt.value === 'none')); } } select.innerHTML = ''; defaultOptions.forEach(option => select.appendChild(option.cloneNode(true))); projects.forEach(project => { const option = document.createElement('option'); option.value = project.id; option.textContent = project.name; select.appendChild(option); }); if (Array.from(select.options).some(opt => opt.value === currentSelectedValue)) { select.value = currentSelectedValue; } else if (select.id === 'project-select') { select.value = 'all'; } if (select.id === 'project-select') { handleProjectSelectionState(select.value); } }); console.log('Selectores de proyecto actualizados.'); }
+        function addProject() { const projectNameInput = document.getElementById('new-project-name'); const projectName = projectNameInput.value.trim(); if (!projectName) { alert('Por favor, ingresa un nombre para el proyecto.'); projectNameInput.focus(); return; } const projects = loadFromStorage('chatlog_projects') || []; if (projects.some(p => p.name.toLowerCase() === projectName.toLowerCase())) { alert('Ya existe un proyecto con ese nombre.'); projectNameInput.focus(); return; } const newProject = { id: Date.now().toString() + Math.random().toString(36).substring(2, 8), name: projectName, dateCreated: new Date().toISOString() }; projects.push(newProject); if (saveToStorage('chatlog_projects', projects)) { console.log(`Proyecto "${projectName}" creado con ID ${newProject.id}`); projectNameInput.value = ''; loadProjects(); if (document.getElementById('tools')?.classList.contains('active')) { loadProjectsForManagement(); } const projectSelect = document.getElementById('project-select'); if (projectSelect) { projectSelect.value = newProject.id; handleProjectSelection(); } alert(`Proyecto "${projectName}" creado.`); } }
+        function deleteProject() { const projectSelect = document.getElementById('project-select'); const selectedProjectId = projectSelect.value; const selectedProjectName = projectSelect.options[projectSelect.selectedIndex]?.text; if (!selectedProjectId || selectedProjectId === 'all' || selectedProjectId === 'none') { alert('Por favor, selecciona un proyecto válido para eliminar.'); return; } const records = loadFromStorage('chatlog_records') || []; const associatedRecordsCount = records.filter(r => r.projectId === selectedProjectId).length; let confirmationMessage = `¿Estás seguro de que deseas eliminar el proyecto "${selectedProjectName}"?`; if (associatedRecordsCount > 0) { confirmationMessage += `\n\n(${associatedRecordsCount} registro(s) asociado(s) perderán esta asignación y quedarán "Sin Proyecto").`; } if (!confirm(confirmationMessage)) { return; } deleteProjectById(selectedProjectId, selectedProjectName); }
+        function deleteProjectById(projectId, projectName = 'este proyecto') { if (!projectId) return; console.log(`Intentando eliminar proyecto ID: ${projectId}`); const projects = loadFromStorage('chatlog_projects') || []; const filteredProjects = projects.filter(project => project.id !== projectId); if (saveToStorage('chatlog_projects', filteredProjects)) { console.log(`Proyecto ID ${projectId} eliminado del almacenamiento.`); const records = loadFromStorage('chatlog_records') || []; let recordsUpdatedCount = 0; const updatedRecords = records.map(record => { if (record.projectId === projectId) { recordsUpdatedCount++; return { ...record, projectId: null }; } return record; }); if (recordsUpdatedCount > 0) { if (!saveToStorage('chatlog_records', updatedRecords)) { alert('Error al actualizar los registros asociados al proyecto eliminado.'); } else { console.log(`${recordsUpdatedCount} registros actualizados a "Sin Proyecto".`); } } loadProjects(); const projectSelect = document.getElementById('project-select'); if (projectSelect && projectSelect.value === projectId) { projectSelect.value = 'all'; } handleProjectSelection(); if (document.getElementById('tools')?.classList.contains('active')) { loadProjectsForManagement(); loadRecordsForManagement(); } alert(`Proyecto "${projectName}" eliminado.`); } else { alert(`Error al eliminar el proyecto "${projectName}".`); } }
+        function handleProjectSelectionState(selectedValue) { const deleteProjectBtn = document.getElementById('delete-project-btn'); if (deleteProjectBtn) { deleteProjectBtn.disabled = (!selectedValue || selectedValue === 'all' || selectedValue === 'none'); } }
+        function handleProjectSelection() { const projectSelect = document.getElementById('project-select'); const selectedValue = projectSelect.value; handleProjectSelectionState(selectedValue); console.log(`Filtrando acceso rápido por proyecto: ${selectedValue}`); loadQuickAccessList(selectedValue); }
+
+        // --- GESTION Y EDICIÓN DE PROYECTOS (EN HERRAMIENTAS) --- (Lógica sin cambios)
+        function loadProjectsForManagement() { const projectsTableBody = document.querySelector('#projects-management-table tbody'); if (!projectsTableBody) { console.warn("Tabla de gestión de proyectos no encontrada."); return; } const projects = loadFromStorage('chatlog_projects') || []; console.log(`Cargando ${projects.length} proyectos para gestión...`); if (projects.length === 0) { projectsTableBody.innerHTML = '<tr><td colspan="4" class="no-data-message">No hay proyectos creados</td></tr>'; return; } projects.sort((a, b) => a.name.localeCompare(b.name)); const records = loadFromStorage('chatlog_records') || []; const recordCounts = {}; records.forEach(record => { const projectId = record.projectId || 'none'; if (!recordCounts[projectId]) recordCounts[projectId] = 0; recordCounts[projectId]++; }); projectsTableBody.innerHTML = ''; projects.forEach(project => { const row = document.createElement('tr'); row.setAttribute('data-project-id', project.id); const nameCell = document.createElement('td'); nameCell.setAttribute('data-label', 'Nombre'); nameCell.textContent = project.name; const dateCell = document.createElement('td'); dateCell.setAttribute('data-label', 'Fecha Creación'); try { const date = new Date(project.dateCreated); dateCell.textContent = date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }); } catch (e) { dateCell.textContent = 'Inválida'; } const recordsCell = document.createElement('td'); recordsCell.setAttribute('data-label', 'Registros'); recordsCell.textContent = recordCounts[project.id] || 0; const actionsCell = document.createElement('td'); actionsCell.setAttribute('data-label', 'Acciones'); const actionButtons = document.createElement('div'); actionButtons.className = 'action-buttons'; const editBtn = document.createElement('button'); editBtn.className = 'edit-btn'; editBtn.textContent = 'Editar'; editBtn.setAttribute('aria-label', `Editar ${project.name}`); editBtn.addEventListener('click', (e) => { e.stopPropagation(); editProject(project); }); const deleteBtn = document.createElement('button'); deleteBtn.className = 'delete-btn'; deleteBtn.textContent = 'Eliminar'; deleteBtn.setAttribute('aria-label', `Eliminar ${project.name}`); deleteBtn.addEventListener('click', (e) => { e.stopPropagation(); const associatedCount = recordCounts[project.id] || 0; let confirmationMessage = `¿Seguro que quieres eliminar el proyecto "${project.name}"?`; if (associatedCount > 0) confirmationMessage += `\n\n(${associatedCount} registro(s) asociado(s) quedarán "Sin Proyecto").`; if (confirm(confirmationMessage)) { deleteProjectById(project.id, project.name); } }); actionButtons.appendChild(editBtn); actionButtons.appendChild(deleteBtn); actionsCell.appendChild(actionButtons); row.appendChild(nameCell); row.appendChild(dateCell); row.appendChild(recordsCell); row.appendChild(actionsCell); projectsTableBody.appendChild(row); }); console.log('Tabla de gestión de proyectos actualizada.'); }
+        function editProject(project) { const editForm = document.getElementById('edit-project-form'); const projectIdInput = document.getElementById('edit-project-id'); const projectNameInput = document.getElementById('edit-project-name'); if (!editForm || !projectIdInput || !projectNameInput) { console.error("Elementos del form de edición de proyecto no encontrados."); return; } projectIdInput.value = project.id; projectNameInput.value = project.name; editForm.style.display = 'block'; projectNameInput.focus(); editForm.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+        function saveProjectEdit() { const projectId = document.getElementById('edit-project-id').value; const projectNameInput = document.getElementById('edit-project-name'); const projectName = projectNameInput.value.trim(); if (!projectName) { alert('Ingresa un nombre para el proyecto.'); projectNameInput.focus(); return; } if (!projectId) { console.error("ID de proyecto no encontrado para guardar."); alert("Error: No se pudo identificar el proyecto a editar."); return; } const projects = loadFromStorage('chatlog_projects') || []; if (projects.some(p => p.name.toLowerCase() === projectName.toLowerCase() && p.id !== projectId)) { alert('Ya existe otro proyecto con ese nombre.'); projectNameInput.focus(); return; } let projectFound = false; const updatedProjects = projects.map(project => { if (project.id === projectId) { projectFound = true; return { ...project, name: projectName }; } return project; }); if (!projectFound) { console.error(`Proyecto ID ${projectId} no encontrado para editar.`); alert("Error: No se encontró el proyecto original."); return; } if (saveToStorage('chatlog_projects', updatedProjects)) { console.log(`Proyecto ID ${projectId} actualizado a "${projectName}".`); alert('Proyecto actualizado.'); loadProjects(); loadProjectsForManagement(); cancelProjectEdit(); } else { alert('Error al guardar cambios del proyecto.'); } }
+        function cancelProjectEdit() { const editForm = document.getElementById('edit-project-form'); if (editForm) { editForm.style.display = 'none'; document.getElementById('edit-project-id').value = ''; document.getElementById('edit-project-name').value = ''; } }
+
+        // --- SISTEMA DE CALIFICACIÓN --- (Lógica sin cambios)
+        function initRatingSystem() { const ratingContainer = document.querySelector('.rating-container'); if (!ratingContainer) return; const stars = ratingContainer.querySelectorAll('.star'); const ratingText = ratingContainer.querySelector('.rating-text'); const ratingValueInput = ratingContainer.querySelector('#rating-value'); if (!stars.length || !ratingText || !ratingValueInput) { console.warn("Elementos del sistema de calificación no encontrados."); return; } const ratingDescriptions = [ 'Sin calificar', 'Insatisfactorio', 'Mejorable', 'Satisfactorio', 'Bueno', 'Excelente' ]; function updateStarsUI(rating) { stars.forEach(s => { const starRating = parseInt(s.getAttribute('data-rating')); s.classList.toggle('active', starRating <= rating); s.classList.remove('hover'); }); ratingText.textContent = ratingDescriptions[rating]; } stars.forEach(star => { const rating = parseInt(star.getAttribute('data-rating')); star.addEventListener('click', function() { ratingValueInput.value = rating; updateStarsUI(rating); }); star.addEventListener('mouseover', function() { const currentHoverRating = parseInt(this.getAttribute('data-rating')); stars.forEach(s => { const starRating = parseInt(s.getAttribute('data-rating')); s.classList.toggle('hover', starRating <= currentHoverRating && !s.classList.contains('active')); }); }); star.addEventListener('mouseout', function() { stars.forEach(s => s.classList.remove('hover')); const currentRating = parseInt(ratingValueInput.value) || 0; ratingText.textContent = ratingDescriptions[currentRating]; }); }); window.loadRating = function(rating) { const numericRating = parseInt(rating) || 0; if (numericRating >= 0 && numericRating <= 5) { ratingValueInput.value = numericRating; updateStarsUI(numericRating); } else { ratingValueInput.value = 0; updateStarsUI(0); } }; window.loadRating(0); console.log('Sistema de calificación inicializado.'); }
+
+        // --- GESTIÓN DE REGISTROS (FORMULARIO PRINCIPAL) --- (Lógica sin cambios)
+        function saveRecord() { console.log('Guardando registro...'); const recordId = document.getElementById('record-id').value; const interactionNameInput = document.getElementById('interaction-name'); const purposeSelect = document.getElementById('purpose'); const otherPurposeInput = document.getElementById('other-purpose'); const llmNameInput = document.getElementById('llm-name'); const llmVersionInput = document.getElementById('llm-version'); const promptInput = document.getElementById('prompt'); const interactionLinkInput = document.getElementById('interaction-link'); const ethicalNotesInput = document.getElementById('ethical-notes'); const biasNotesInput = document.getElementById('bias-notes'); const observationsInput = document.getElementById('observations'); const ratingInput = document.getElementById('rating-value'); const projectSelect = document.getElementById('project-select'); if (!interactionNameInput || !purposeSelect || !otherPurposeInput || !llmNameInput || !promptInput || !ratingInput || !projectSelect) { console.error("Faltan elementos clave del formulario."); alert("Error interno: Formulario incompleto."); return; } const interactionName = interactionNameInput.value.trim(); const purposeValue = purposeSelect.value; const purpose = purposeValue === 'Otro' ? otherPurposeInput.value.trim() : purposeValue; const llmName = llmNameInput.value.trim(); const llmVersion = llmVersionInput ? llmVersionInput.value.trim() : ''; const prompt = promptInput.value.trim(); const interactionLink = interactionLinkInput ? interactionLinkInput.value.trim() : ''; const ethicalNotes = ethicalNotesInput ? ethicalNotesInput.value.trim() : ''; const biasNotes = biasNotesInput ? biasNotesInput.value.trim() : ''; const observations = observationsInput ? observationsInput.value.trim() : ''; const rating = ratingInput.value; const selectedProject = projectSelect.value; const projectId = (selectedProject && selectedProject !== 'all' && selectedProject !== 'none') ? selectedProject : null; let errors = []; if (!interactionName) errors.push('Nombre'); if (!purpose) errors.push('Finalidad'); if (purposeValue === 'Otro' && !otherPurposeInput.value.trim()) errors.push('Especificar Finalidad'); if (!llmName) errors.push('Nombre LLM'); if (!prompt) errors.push('Prompt'); if (errors.length > 0) { alert(`Completa los campos obligatorios:\n- ${errors.join('\n- ')}`); if (!interactionName) interactionNameInput.focus(); else if (!purpose || (purposeValue === 'Otro' && !otherPurposeInput.value.trim())) purposeSelect.focus(); else if (!llmName) llmNameInput.focus(); else if (!prompt) promptInput.focus(); return; } const records = loadFromStorage('chatlog_records') || []; const existingRecord = recordId ? records.find(r => r.id === recordId) : null; const record = { id: recordId || Date.now().toString() + Math.random().toString(36).substring(2, 8), interactionName, purpose, llmName, llmVersion, prompt, interactionLink, tags: [...currentTags], ethicalNotes, biasNotes, observations, rating, projectId, dateCreated: existingRecord ? existingRecord.dateCreated : new Date().toISOString(), dateModified: new Date().toISOString() }; let updatedRecords; if (recordId && existingRecord) { console.log(`Actualizando registro ID: ${recordId}`); updatedRecords = records.map(r => r.id === recordId ? record : r); } else { console.log(`Creando nuevo registro ID: ${record.id}`); updatedRecords = [...records, record]; } if (saveToStorage('chatlog_records', updatedRecords)) { resetRecordForm(); loadQuickAccessList(projectSelect.value); updateAllTags(); if (document.getElementById('tools')?.classList.contains('active')) loadRecordsForManagement(); if (document.getElementById('stats')?.classList.contains('active')) loadStatistics(); if (document.getElementById('declaration')?.classList.contains('active')) loadRecordsForDeclaration(); alert(recordId ? 'Registro actualizado.' : 'Registro guardado.'); } else { alert(recordId? 'Error al actualizar.' : 'Error al guardar.'); } }
+        function loadQuickAccessList(projectFilterValue = null) { const quickAccessListContainer = document.getElementById('quick-access-list'); if (!quickAccessListContainer) return; const noRecordsMessage = quickAccessListContainer.querySelector('#no-records-message'); const recentRecordsList = quickAccessListContainer.querySelector('#recent-records'); if (!noRecordsMessage || !recentRecordsList) { console.error("Elementos de Acceso Rápido no encontrados."); return; } let allRecords = loadFromStorage('chatlog_records') || []; console.log(`Acceso rápido. Total: ${allRecords.length}. Filtro: ${projectFilterValue}`); let filteredRecords = allRecords; if (projectFilterValue && projectFilterValue !== 'all') { if (projectFilterValue === 'none') { filteredRecords = allRecords.filter(record => !record.projectId); } else { filteredRecords = allRecords.filter(record => record.projectId === projectFilterValue); } } console.log(`Filtrados: ${filteredRecords.length}`); filteredRecords.sort((a, b) => new Date(b.dateModified || 0) - new Date(a.dateModified || 0)); const recentRecords = filteredRecords.slice(0, 10); if (recentRecords.length === 0) { noRecordsMessage.style.display = 'block'; recentRecordsList.innerHTML = ''; console.log('No hay registros para acceso rápido.'); return; } noRecordsMessage.style.display = 'none'; recentRecordsList.innerHTML = ''; recentRecords.forEach(record => { const li = document.createElement('li'); li.setAttribute('data-record-id', record.id); const titleSpan = document.createElement('span'); titleSpan.textContent = record.interactionName || 'Registro sin nombre'; titleSpan.style.marginRight = '10px'; li.appendChild(titleSpan); if (record.rating && parseInt(record.rating) > 0) { const ratingSpan = document.createElement('span'); ratingSpan.className = 'list-rating'; ratingSpan.innerHTML = '★'.repeat(parseInt(record.rating)); li.appendChild(ratingSpan); } li.addEventListener('click', function() { const recordIdToLoad = this.getAttribute('data-record-id'); console.log(`Acceso rápido: Cargando ID ${recordIdToLoad}`); loadRecordForEdit(recordIdToLoad); }); recentRecordsList.appendChild(li); }); console.log(`Mostrando ${recentRecords.length} en acceso rápido.`); }
+        function loadRecordForEdit(recordId) { if (!recordId) { console.error("Intento de cargar registro sin ID."); return; } const records = loadFromStorage('chatlog_records') || []; const record = records.find(r => r.id === recordId); if (!record) { alert('Error: No se encontró el registro.'); console.error(`Registro ID ${recordId} no encontrado.`); return; } console.log(`Cargando ID ${recordId} en formulario.`); const mainTabButton = document.querySelector('.tab-button[data-tab="main"]'); if (mainTabButton && !mainTabButton.classList.contains('active')) { mainTabButton.click(); } const formTitle = document.getElementById('form-title'); if (formTitle) formTitle.textContent = 'Editar Registro'; document.getElementById('record-id').value = record.id; document.getElementById('interaction-name').value = record.interactionName; const purposeField = document.getElementById('purpose'); const otherPurposeContainer = document.getElementById('other-purpose-container'); const otherPurposeInput = document.getElementById('other-purpose'); if (Array.from(purposeField.options).some(opt => opt.value === record.purpose)) { purposeField.value = record.purpose; otherPurposeContainer.style.display = 'none'; otherPurposeInput.value = ''; otherPurposeInput.required = false; } else { purposeField.value = 'Otro'; otherPurposeContainer.style.display = 'block'; otherPurposeInput.value = record.purpose; otherPurposeInput.required = true; } document.getElementById('llm-name').value = record.llmName; document.getElementById('llm-version').value = record.llmVersion || ''; document.getElementById('prompt').value = record.prompt; document.getElementById('interaction-link').value = record.interactionLink || ''; document.getElementById('ethical-notes').value = record.ethicalNotes || ''; document.getElementById('bias-notes').value = record.biasNotes || ''; document.getElementById('observations').value = record.observations || ''; if (window.loadRating) window.loadRating(record.rating || 0); currentTags = Array.isArray(record.tags) ? [...record.tags] : []; updateTagsList(); const projectSelect = document.getElementById('project-select'); if (projectSelect) { if (record.projectId && Array.from(projectSelect.options).some(opt => opt.value === record.projectId)) { projectSelect.value = record.projectId; } else { projectSelect.value = 'none'; } handleProjectSelectionState(projectSelect.value); } const cancelBtn = document.getElementById('cancel-edit-btn'); if (cancelBtn) cancelBtn.style.display = 'inline-block'; const saveBtn = document.getElementById('save-record-btn'); if(saveBtn) saveBtn.textContent = 'Actualizar Registro'; if (formTitle) formTitle.scrollIntoView({ behavior: 'smooth', block: 'start' }); console.log('Formulario llenado para edición.'); }
+        function resetRecordForm() { console.log('Reseteando formulario.'); const form = document.getElementById('record-form'); if (form) form.reset(); document.getElementById('record-id').value = ''; const formTitle = document.getElementById('form-title'); if (formTitle) formTitle.textContent = 'Nuevo Registro'; const otherPurposeContainer = document.getElementById('other-purpose-container'); if (otherPurposeContainer) otherPurposeContainer.style.display = 'none'; const otherPurposeInput = document.getElementById('other-purpose'); if (otherPurposeInput) { otherPurposeInput.value = ''; otherPurposeInput.required = false; } const cancelBtn = document.getElementById('cancel-edit-btn'); if (cancelBtn) cancelBtn.style.display = 'none'; const saveBtn = document.getElementById('save-record-btn'); if(saveBtn) saveBtn.textContent = 'Guardar Registro'; currentTags = []; updateTagsList(); if (window.loadRating) window.loadRating(0); console.log('Formulario reseteado.'); }
+        function cancelEditRecord() { console.log('Cancelando edición.'); resetRecordForm(); }
+
+        // --- GESTIÓN Y EDICIÓN DE REGISTROS (EN HERRAMIENTAS) --- (Lógica sin cambios)
+        function initRecordsManagementFilters() { const projectFilter = document.getElementById('records-project-filter'); if (!projectFilter) return; const projects = loadFromStorage('chatlog_projects') || []; const allOption = projectFilter.options.length > 0 ? projectFilter.options[0].cloneNode(true) : null; projectFilter.innerHTML = ''; if (allOption) projectFilter.appendChild(allOption); if (!Array.from(projectFilter.options).some(opt => opt.value === 'none')) { const noneOption = document.createElement('option'); noneOption.value = 'none'; noneOption.textContent = 'Sin proyecto'; projectFilter.appendChild(noneOption); } projects.sort((a, b) => a.name.localeCompare(b.name)); projects.forEach(project => { const option = document.createElement('option'); option.value = project.id; option.textContent = project.name; projectFilter.appendChild(option); }); console.log("Filtros de gestión de registros inicializados."); }
+        function loadRecordsForManagement() { const recordsContainer = document.getElementById('records-by-project'); if (!recordsContainer) { console.warn("Contenedor gestión registros no encontrado."); return; } console.log('Cargando registros para gestión...'); const allRecords = loadFromStorage('chatlog_records') || []; const projects = loadFromStorage('chatlog_projects') || []; const projectFilter = document.getElementById('records-project-filter')?.value || 'all'; const sortBy = document.getElementById('records-sort-by')?.value || 'date-desc'; if (allRecords.length === 0) { recordsContainer.innerHTML = '<div class="no-data-message">No hay registros.</div>'; return; } const projectsMap = {}; projects.forEach(project => { projectsMap[project.id] = project.name; }); let filteredRecords = [...allRecords]; if (projectFilter !== 'all') { if (projectFilter === 'none') { filteredRecords = allRecords.filter(record => !record.projectId); } else { filteredRecords = allRecords.filter(record => record.projectId === projectFilter); } } console.log(`Filtrando por ${projectFilter}. Restantes: ${filteredRecords.length}`); sortRecords(filteredRecords, sortBy); console.log(`Ordenando por ${sortBy}.`); const recordsByProject = {}; recordsByProject['none'] = { name: 'Sin proyecto', records: [] }; filteredRecords.forEach(record => { const projectId = record.projectId || 'none'; if (!recordsByProject[projectId]) { recordsByProject[projectId] = { name: projectId === 'none' ? 'Sin proyecto' : (projectsMap[projectId] || `ID: ${projectId.substring(0,6)}...`), records: [] }; } recordsByProject[projectId].records.push(record); }); recordsContainer.innerHTML = ''; const projectOrder = Object.keys(recordsByProject).sort((a, b) => { if (a === 'none') return 1; if (b === 'none') return -1; return recordsByProject[a].name.localeCompare(recordsByProject[b].name); }); projectOrder.forEach(projectId => { const projectGroup = recordsByProject[projectId]; if (projectGroup.records.length === 0) return; const groupElement = document.createElement('div'); groupElement.className = 'project-group'; const headerElement = document.createElement('div'); headerElement.className = 'project-header'; headerElement.setAttribute('data-project-id', projectId); headerElement.innerHTML = `<div class="project-name">${projectGroup.name}</div> <div class="project-count">${projectGroup.records.length} ${projectGroup.records.length === 1 ? 'registro' : 'registros'}</div>`; const recordsListElement = document.createElement('div'); recordsListElement.className = 'project-records'; headerElement.addEventListener('click', function() { recordsListElement.classList.toggle('expanded'); }); projectGroup.records.forEach(record => { const recordElement = createRecordElement(record, projectsMap); recordsListElement.appendChild(recordElement); }); groupElement.appendChild(headerElement); groupElement.appendChild(recordsListElement); recordsContainer.appendChild(groupElement); }); if (recordsContainer.children.length === 0) { recordsContainer.innerHTML = '<div class="no-data-message">No hay registros para los filtros aplicados.</div>'; } console.log('Interfaz gestión registros actualizada.'); }
+        function createRecordElement(record, projectsMap) { const recordElement = document.createElement('div'); recordElement.className = 'record-row'; recordElement.setAttribute('data-record-id', record.id); const infoElement = document.createElement('div'); infoElement.className = 'record-info'; const nameElement = document.createElement('div'); nameElement.className = 'record-name'; nameElement.textContent = record.interactionName || 'Sin nombre'; if (record.rating && parseInt(record.rating) > 0) { const ratingSpan = document.createElement('span'); ratingSpan.className = 'record-rating'; ratingSpan.innerHTML = '★'.repeat(parseInt(record.rating)); nameElement.appendChild(ratingSpan); } const detailsElement = document.createElement('div'); detailsElement.className = 'record-details'; let formattedDate = 'Fecha inv.'; try { const recordDate = new Date(record.dateModified || record.dateCreated); formattedDate = recordDate.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }); } catch(e) {} detailsElement.textContent = `${record.llmName || 'Mod.Desc.'} - ${formattedDate}`; infoElement.appendChild(nameElement); infoElement.appendChild(detailsElement); const actionsElement = document.createElement('div'); actionsElement.className = 'record-actions'; const editBtn = document.createElement('button'); editBtn.className = 'edit-btn'; editBtn.textContent = 'Editar'; editBtn.setAttribute('aria-label', `Editar ${record.interactionName}`); editBtn.addEventListener('click', function(e) { e.stopPropagation(); console.log(`Editando ID ${record.id} desde herramientas.`); editRecord(record.id); }); const deleteBtn = document.createElement('button'); deleteBtn.className = 'delete-btn'; deleteBtn.textContent = 'Eliminar'; deleteBtn.setAttribute('aria-label', `Eliminar ${record.interactionName}`); deleteBtn.addEventListener('click', function(e) { e.stopPropagation(); if (confirm(`¿Seguro que quieres eliminar "${record.interactionName || 'este registro'}"?`)) { console.log(`Eliminando ID ${record.id} desde herramientas.`); deleteRecord(record.id); } }); actionsElement.appendChild(editBtn); actionsElement.appendChild(deleteBtn); recordElement.appendChild(infoElement); recordElement.appendChild(actionsElement); return recordElement; }
+        function sortRecords(records, sortBy) { if (!Array.isArray(records)) return; switch (sortBy) { case 'date-desc': records.sort((a, b) => new Date(b.dateModified || 0) - new Date(a.dateModified || 0)); break; case 'date-asc': records.sort((a, b) => new Date(a.dateModified || 0) - new Date(b.dateModified || 0)); break; case 'rating-desc': records.sort((a, b) => { const rA = parseInt(a.rating) || 0; const rB = parseInt(b.rating) || 0; return rB === rA ? (new Date(b.dateModified || 0) - new Date(a.dateModified || 0)) : rB - rA; }); break; case 'rating-asc': records.sort((a, b) => { const rA = parseInt(a.rating) || 0; const rB = parseInt(b.rating) || 0; return rA === rB ? (new Date(b.dateModified || 0) - new Date(a.dateModified || 0)) : rA - rB; }); break; case 'name': records.sort((a, b) => (a.interactionName || '').localeCompare(b.interactionName || '')); break; default: records.sort((a, b) => new Date(b.dateModified || 0) - new Date(a.dateModified || 0)); break; } }
+        function editRecord(recordId) { if (!recordId) return; const mainTabButton = document.querySelector('.tab-button[data-tab="main"]'); if (mainTabButton && !mainTabButton.classList.contains('active')) { mainTabButton.click(); setTimeout(() => loadRecordForEdit(recordId), 50); } else { loadRecordForEdit(recordId); } }
+        function deleteRecord(recordId) { if (!recordId) return; const records = loadFromStorage('chatlog_records') || []; const initialLength = records.length; const filteredRecords = records.filter(record => record.id !== recordId); if (filteredRecords.length === initialLength) { console.warn(`Intento de eliminar ID ${recordId} no encontrado.`); alert("Error: Registro no encontrado."); return; } if (saveToStorage('chatlog_records', filteredRecords)) { console.log(`Registro ID ${recordId} eliminado.`); loadRecordsForManagement(); loadQuickAccessList(document.getElementById('project-select')?.value); updateAllTags(); updateStorageUsage(); if (document.getElementById('stats')?.classList.contains('active')) loadStatistics(); if (document.getElementById('declaration')?.classList.contains('active')) loadRecordsForDeclaration(); alert('Registro eliminado.'); } else { alert('Error al eliminar.'); } }
+
+        // --- SISTEMA DE ETIQUETAS --- (Lógica sin cambios)
+        function initTagsSystem() { updateAllTags(); const tagsInput = document.getElementById('tags-input'); const tagsList = document.getElementById('tags-list'); const tagsSuggestions = document.getElementById('tags-suggestions'); if (!tagsInput || !tagsList || !tagsSuggestions) { console.warn("Elementos sistema etiquetas no encontrados."); return; } tagsInput.addEventListener('keydown', function(e) { if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); const tagValue = this.value.trim(); if (tagValue) { addTag(tagValue); this.value = ''; tagsSuggestions.style.display = 'none'; } } else if (e.key === 'Backspace' && this.value === '' && currentTags.length > 0) { removeTag(currentTags[currentTags.length - 1]); } }); tagsInput.addEventListener('keyup', function(e) { const ignoredKeys = ['Enter', ',', 'Shift', 'Control', 'Alt', 'CapsLock', 'Tab', 'Escape', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Backspace']; if (ignoredKeys.includes(e.key)) return; const inputVal = this.value.trim(); if (inputVal.length > 0) showTagSuggestions(inputVal); else tagsSuggestions.style.display = 'none'; }); tagsInput.addEventListener('focus', function() { const inputVal = this.value.trim(); if (inputVal.length > 0) showTagSuggestions(inputVal); }); document.addEventListener('click', function(e) { const tagsContainer = tagsInput.closest('.tags-container'); if (tagsContainer && !tagsContainer.contains(e.target)) tagsSuggestions.style.display = 'none'; }); console.log('Sistema etiquetas inicializado.'); }
+        function updateAllTags() { const records = loadFromStorage('chatlog_records') || []; const tagsSet = new Set(); records.forEach(record => { if (record.tags && Array.isArray(record.tags)) record.tags.forEach(tag => { if(tag && typeof tag === 'string') tagsSet.add(tag.trim()); }); }); allTags = Array.from(tagsSet).sort((a, b) => a.localeCompare(b)); console.log(`Etiquetas globales: ${allTags.length}`); }
+        function showTagSuggestions(input) { const tagsSuggestions = document.getElementById('tags-suggestions'); if (!tagsSuggestions) return; const inputLower = input.toLowerCase(); const suggestions = allTags.filter(tag => tag.toLowerCase().includes(inputLower) && !currentTags.includes(tag)).slice(0, 10); if (suggestions.length === 0) { tagsSuggestions.style.display = 'none'; return; } tagsSuggestions.innerHTML = ''; suggestions.forEach(suggestion => { const div = document.createElement('div'); div.className = 'suggestion-item'; const startIndex = suggestion.toLowerCase().indexOf(inputLower); if (startIndex !== -1) { div.innerHTML = suggestion.substring(0, startIndex) + `<strong>${suggestion.substring(startIndex, startIndex + input.length)}</strong>` + suggestion.substring(startIndex + input.length); } else { div.textContent = suggestion; } div.addEventListener('mousedown', function(e) { e.preventDefault(); addTag(suggestion); document.getElementById('tags-input').value = ''; tagsSuggestions.style.display = 'none'; document.getElementById('tags-input').focus(); }); tagsSuggestions.appendChild(div); }); tagsSuggestions.style.display = 'block'; }
+        function addTag(tag) { tag = tag.trim(); if (!tag || tag.length === 0) return; if (!currentTags.some(existingTag => existingTag.toLowerCase() === tag.toLowerCase())) { if (currentTags.length >= 20) { alert("Límite de 20 etiquetas alcanzado."); return; } currentTags.push(tag); updateTagsList(); document.getElementById('tags').value = JSON.stringify(currentTags); if (!allTags.some(globalTag => globalTag.toLowerCase() === tag.toLowerCase())) { allTags.push(tag); allTags.sort((a, b) => a.localeCompare(b)); console.log(`Nueva etiqueta global: ${tag}`); } console.log(`Etiqueta añadida: ${tag}. Actuales:`, currentTags); } else { console.log(`Etiqueta "${tag}" ya existe.`); } }
+        function removeTag(tagToRemove) { const index = currentTags.findIndex(tag => tag.toLowerCase() === tagToRemove.toLowerCase()); if (index !== -1) { const removed = currentTags.splice(index, 1); updateTagsList(); document.getElementById('tags').value = JSON.stringify(currentTags); console.log(`Etiqueta eliminada: ${removed[0]}. Actuales:`, currentTags); } else { console.warn(`Intento de eliminar etiqueta no encontrada: ${tagToRemove}`); } }
+        function updateTagsList() { const tagsListElement = document.getElementById('tags-list'); if (!tagsListElement) return; tagsListElement.innerHTML = ''; currentTags.forEach(tag => { const tagElement = document.createElement('div'); tagElement.className = 'tag-item'; const tagText = document.createElement('span'); tagText.textContent = tag; const removeBtn = document.createElement('span'); removeBtn.className = 'tag-remove'; removeBtn.innerHTML = '&times;'; removeBtn.setAttribute('aria-label', `Eliminar ${tag}`); removeBtn.setAttribute('role', 'button'); removeBtn.tabIndex = 0; removeBtn.addEventListener('click', function() { removeTag(tag); }); removeBtn.addEventListener('keydown', function(e) { if (e.key === 'Enter' || e.key === ' ') { removeTag(tag); document.getElementById('tags-input').focus(); } }); tagElement.appendChild(tagText); tagElement.appendChild(removeBtn); tagsListElement.appendChild(tagElement); }); }
+
+        // --- MANEJO DEL CAMPO "OTRO" EN FINALIDAD --- (Lógica sin cambios)
+        function initOtherPurposeField() { const purposeSelect = document.getElementById('purpose'); const otherContainer = document.getElementById('other-purpose-container'); const otherInput = document.getElementById('other-purpose'); if (!purposeSelect || !otherContainer || !otherInput) { console.warn("Elementos 'Otra Finalidad' no encontrados."); return; } purposeSelect.addEventListener('change', function() { const isOther = this.value === 'Otro'; otherContainer.style.display = isOther ? 'block' : 'none'; otherInput.required = isOther; if(isOther) otherInput.focus(); else otherInput.value = ''; }); console.log("Campo 'Otra Finalidad' inicializado."); }
+
+        // --- DECLARACIÓN DE USO --- (Lógica sin cambios funcionales, adaptada a referencias)
+        function loadDeclarationProjects() { /* Ya cubierto por loadProjects */ }
+        function loadRecordsForDeclaration() { const recordsListContainer = document.getElementById('records-list'); const noRecordsMessage = document.getElementById('no-declaration-records-message'); if (!recordsListContainer || !noRecordsMessage) { console.error("Elementos lista declaración no encontrados."); return; } console.log("Cargando registros para declaración..."); const allRecords = loadFromStorage('chatlog_records') || []; if (allRecords.length === 0) { noRecordsMessage.style.display = 'block'; recordsListContainer.innerHTML = ''; selectedRecords = []; return; } noRecordsMessage.style.display = 'none'; recordsListContainer.innerHTML = ''; filterRecordsForDeclaration(); }
+        function filterRecordsForDeclaration() { const projectFilter = document.getElementById('declaration-project-select')?.value || 'all'; const recordsList = document.getElementById('records-list'); const noRecordsMessage = document.getElementById('no-declaration-records-message'); if (!recordsList || !noRecordsMessage) return; console.log(`Filtrando declaración por: ${projectFilter}`); let allRecords = loadFromStorage('chatlog_records') || []; let filteredRecords = [...allRecords]; if (projectFilter !== 'all') { if (projectFilter === 'none') { filteredRecords = allRecords.filter(record => !record.projectId); } else { filteredRecords = allRecords.filter(record => record.projectId === projectFilter); } } const projects = loadFromStorage('chatlog_projects') || []; filteredRecords.sort((a, b) => { const pA = a.projectId || 'zzz'; const pB = b.projectId || 'zzz'; if (pA !== pB) { const nA = pA === 'zzz' ? 'Sin proyecto' : (projects.find(p => p.id === pA)?.name || 'Desc.'); const nB = pB === 'zzz' ? 'Sin proyecto' : (projects.find(p => p.id === pB)?.name || 'Desc.'); return nA.localeCompare(nB); } return new Date(b.dateModified || 0) - new Date(a.dateModified || 0); }); recordsList.innerHTML = ''; if (filteredRecords.length === 0) { noRecordsMessage.style.display = 'block'; return; } noRecordsMessage.style.display = 'none'; const projectsMap = {}; projects.forEach(project => { projectsMap[project.id] = project.name; }); filteredRecords.forEach(record => { const recordItem = document.createElement('div'); recordItem.className = 'record-item'; const checkbox = document.createElement('input'); checkbox.type = 'checkbox'; checkbox.className = 'record-checkbox'; checkbox.value = record.id; checkbox.checked = selectedRecords.includes(record.id); checkbox.setAttribute('aria-label', `Seleccionar ${record.interactionName}`); checkbox.addEventListener('change', function() { const recordId = this.value; if (this.checked) { if (!selectedRecords.includes(recordId)) selectedRecords.push(recordId); } else { selectedRecords = selectedRecords.filter(id => id !== recordId); } console.log("Seleccionados:", selectedRecords); }); const recordInfo = document.createElement('div'); recordInfo.className = 'record-info'; const recordTitle = document.createElement('div'); recordTitle.className = 'record-title'; recordTitle.textContent = record.interactionName || 'Sin nombre'; if (record.rating && parseInt(record.rating) > 0) { const ratingSpan = document.createElement('span'); ratingSpan.innerHTML = '&nbsp;' + '★'.repeat(parseInt(record.rating)); ratingSpan.style.color = 'var(--star-active)'; ratingSpan.style.fontSize = '0.9em'; recordTitle.appendChild(ratingSpan); } const recordDetails = document.createElement('div'); recordDetails.className = 'record-details'; let formattedDate = 'Fecha desc.'; try { const d = new Date(record.dateModified || record.dateCreated); formattedDate = d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }); } catch(e) {} let projectName = 'Sin proyecto'; if (record.projectId && projectsMap[record.projectId]) projectName = projectsMap[record.projectId]; recordDetails.textContent = `${record.llmName || 'Mod.Desc.'} (${record.purpose || 'Fin.Desc.'}) - ${formattedDate} - ${projectName}`; recordInfo.appendChild(recordTitle); recordInfo.appendChild(recordDetails); recordItem.appendChild(checkbox); recordItem.appendChild(recordInfo); recordsList.appendChild(recordItem); }); console.log(`Mostrando ${filteredRecords.length} registros para declaración.`); }
+        function selectAllRecords() { const checkboxes = document.querySelectorAll('#records-list .record-checkbox'); if (!checkboxes.length) return; checkboxes.forEach(checkbox => { if (!selectedRecords.includes(checkbox.value)) selectedRecords.push(checkbox.value); checkbox.checked = true; }); console.log("Todos visibles seleccionados:", selectedRecords); }
+        function deselectAllRecords() { const checkboxes = document.querySelectorAll('#records-list .record-checkbox'); checkboxes.forEach(checkbox => checkbox.checked = false); selectedRecords = []; console.log("Todos deseleccionados."); }
+        function generateDeclaration() { if (selectedRecords.length === 0) { alert('Selecciona al menos un registro.'); return; } console.log(`Generando declaración para ${selectedRecords.length} registros.`); const format = document.getElementById('declaration-format')?.value || 'standard'; const researcherName = document.getElementById('researcher-name')?.value.trim() || ''; const institutionName = document.getElementById('institution-name')?.value.trim() || ''; const includePrompts = document.getElementById('include-prompts')?.checked ?? true; const includeLinks = document.getElementById('include-links')?.checked ?? true; const includeDates = document.getElementById('include-dates')?.checked ?? true; const declarationPreview = document.getElementById('declaration-preview'); if (!declarationPreview) { console.error("Vista previa declaración no encontrada."); return; } const allRecords = loadFromStorage('chatlog_records') || []; const projects = loadFromStorage('chatlog_projects') || []; const projectsMap = {}; projects.forEach(project => { projectsMap[project.id] = project.name; }); const recordsToInclude = allRecords.filter(record => selectedRecords.includes(record.id)); recordsToInclude.sort((a, b) => { const pA = a.projectId || 'zzz'; const pB = b.projectId || 'zzz'; if (pA !== pB) { const nA = pA === 'zzz' ? 'Sin proyecto' : (projectsMap[pA] || 'Desc.'); const nB = pB === 'zzz' ? 'Sin proyecto' : (projectsMap[pB] || 'Desc.'); return nA.localeCompare(nB); } return new Date(b.dateModified || 0) - new Date(a.dateModified || 0); }); let declarationText = ''; switch (format) { /* ... (resto de la lógica de formato sin cambios) ... */ case 'standard': declarationText += '== DECLARACIÓN DE USO DE MODELOS DE LENGUAJE ==\n\n'; if (researcherName) declarationText += `Investigador/a: ${researcherName}\n`; if (institutionName) declarationText += `Institución: ${institutionName}\n`; declarationText += `Fecha: ${new Date().toLocaleDateString()}\n\n`; declarationText += `Se incluyen ${recordsToInclude.length} interacciones con LLMs.\n`; break; case 'detailed': declarationText += '== DECLARACIÓN DETALLADA DE USO DE LLMs ==\n\n'; if (researcherName || institutionName) { declarationText += 'INFO INVESTIGADOR\n-----------------\n'; if (researcherName) declarationText += `Nombre: ${researcherName}\n`; if (institutionName) declarationText += `Institución: ${institutionName}\n\n`; } declarationText += 'RESUMEN\n-------\n'; declarationText += `Interacciones: ${recordsToInclude.length}\n`; const models = new Set(recordsToInclude.map(r => `${r.llmName}${r.llmVersion ? ` (${r.llmVersion})` : ''}`.trim())); declarationText += `Modelos (${models.size}): ${Array.from(models).join(', ')}\n`; const purposes = new Set(recordsToInclude.map(r => r.purpose)); declarationText += `Finalidades (${purposes.size}): ${Array.from(purposes).join(', ')}\n\n`; declarationText += `Fecha: ${new Date().toLocaleDateString()}\n`; declarationText += '====================\n\n'; break; case 'minimal': declarationText += 'DECLARACIÓN USO LLMs\n\n'; if (researcherName) declarationText += `Por: ${researcherName}\n`; if (institutionName) declarationText += `${institutionName}\n`; declarationText += `${new Date().toLocaleDateString()}\n\n`; declarationText += `Se usaron LLMs en ${recordsToInclude.length} ocasiones.\n\n`; break; case 'apa': if (researcherName) { declarationText += `${researcherName}`; if (institutionName) declarationText += `, ${institutionName}`; declarationText += '.\n\n'; } else if (institutionName) { declarationText += `${institutionName}.\n\n`; } declarationText += 'Declaración de Uso de IA\n\n'; declarationText += 'Durante este trabajo, se usaron los siguientes LLMs:\n\n'; break; } let currentProjectGroup = null; recordsToInclude.forEach((record, index) => { const recordProjectId = record.projectId || 'none'; const recordProjectName = recordProjectId === 'none' ? 'Sin proyecto' : (projectsMap[recordProjectId] || 'Desc.'); if ( (format === 'standard' || format === 'detailed') && recordProjectId !== currentProjectGroup) { currentProjectGroup = recordProjectId; if (index > 0) declarationText += '\n'; declarationText += `--- PROYECTO: ${recordProjectName} ---\n\n`; } switch (format) { case 'standard': declarationText += `${index + 1}. ${record.interactionName || 'Interacción'}`; if (record.rating > 0) declarationText += ` (${record.rating}/5)`; declarationText += '\n'; declarationText += `   Mod: ${record.llmName}${record.llmVersion ? ` (${record.llmVersion})` : ''}\n`; declarationText += `   Fin: ${record.purpose}\n`; if (includeDates) try { declarationText += `   Fecha: ${new Date(record.dateModified || record.dateCreated).toLocaleDateString()}\n`; } catch(e){} if (includePrompts && record.prompt) declarationText += `   Prompt: "${record.prompt}"\n`; if (includeLinks && record.interactionLink) declarationText += `   Link: ${record.interactionLink}\n`; if (record.ethicalNotes) declarationText += `   Ética: ${record.ethicalNotes}\n`; if (record.biasNotes) declarationText += `   Sesgo: ${record.biasNotes}\n`; if (record.observations) declarationText += `   Obs: ${record.observations}\n`; declarationText += '\n'; break; case 'detailed': declarationText += `INTERACCIÓN #${index + 1}: ${record.interactionName || 'Interacción'}`; if (record.rating > 0) declarationText += ` (${record.rating}/5)`; declarationText += `\n${'-'.repeat(15)}\n`; declarationText += `Modelo: ${record.llmName}${record.llmVersion ? ` (${record.llmVersion})` : ''}\n`; declarationText += `Finalidad: ${record.purpose}\n`; if (includeDates) try { const opts = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }; declarationText += `Fecha: ${new Date(record.dateModified || record.dateCreated).toLocaleString(undefined, opts)}\n`; } catch(e){} if (record.tags?.length > 0) declarationText += `Etiquetas: ${record.tags.join(', ')}\n`; if (includeLinks && record.interactionLink) declarationText += `Enlace: ${record.interactionLink}\n`; if (includePrompts && record.prompt) declarationText += `\nPROMPT:\n-------\n${record.prompt}\n`; if (record.ethicalNotes || record.biasNotes || record.observations) { declarationText += '\nNOTAS:\n------\n'; if (record.ethicalNotes) declarationText += `Ética: ${record.ethicalNotes}\n`; if (record.biasNotes) declarationText += `Sesgo: ${record.biasNotes}\n`; if (record.observations) declarationText += `Obs: ${record.observations}\n`; } declarationText += '\n'; break; case 'minimal': declarationText += `- ${record.interactionName || 'Int.'}: ${record.llmName}${record.llmVersion ? `(${record.llmVersion})` : ''} - ${record.purpose}`; if (record.rating > 0) declarationText += ` (${record.rating}/5)`; declarationText += '\n'; break; case 'apa': declarationText += `- Se usó ${record.llmName}${record.llmVersion ? ` (${record.llmVersion})` : ''} para ${record.purpose.toLowerCase()}.`; if (includePrompts && record.prompt) declarationText += ` Prompt: "${record.prompt.substring(0, 80)}${record.prompt.length > 80 ? '...' : ''}"`; if (record.rating > 0) declarationText += ` (${record.rating}/5).`; declarationText += '\n'; break; } }); if (format !== 'apa') { declarationText += '\n===========\nGenerado con ChatLog Demo.\n'; } else { declarationText += '\nDeclaración para transparentar uso de IA.\n'; } declarationPreview.textContent = declarationText; declarationPreview.scrollTop = 0; console.log("Declaración generada."); }
+        function copyDeclarationToClipboard() { const preview = document.getElementById('declaration-preview'); if (!preview) return; const text = preview.textContent; const defaultText = 'La declaración se mostrará aquí después de generarla.'; if (!text || text === defaultText) { alert('Genera una declaración primero.'); return; } if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(text).then(() => { alert('Declaración copiada.'); console.log('Declaración copiada.'); }).catch(err => { alert('Error al copiar.'); console.error('Error al copiar:', err); }); } else { alert('Función de copiar no disponible.'); } }
+        function downloadDeclaration() { const preview = document.getElementById('declaration-preview'); if (!preview) return; const text = preview.textContent; const defaultText = 'La declaración se mostrará aquí después de generarla.'; if (!text || text === defaultText) { alert('Genera una declaración primero.'); return; } try { const blob = new Blob([text], { type: 'text/plain;charset=utf-8' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; const dateStr = new Date().toISOString().split('T')[0].replace(/-/g, ''); a.download = `ChatLog_Declaracion_${dateStr}.txt`; document.body.appendChild(a); a.click(); setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); console.log(`Archivo ${a.download} descargado.`); }, 100); } catch (error) { alert('Error al descargar.'); console.error('Error descarga declaración:', error); } }
+
+        // --- ESTADÍSTICAS --- (Lógica sin cambios funcionales, adaptada a referencias)
+        function loadStatistics() { console.log("Cargando estadísticas..."); const records = loadFromStorage('chatlog_records') || []; if (records.length === 0) { console.log("No hay registros para estadísticas."); showNoStatsData(); return; } applyStatisticsFilters(); }
+        function populateStatisticsFilters() { console.log("Poblando filtros stats..."); /* Proyectos ya poblado por loadProjects() */ const modelFilter = document.getElementById('stats-model-filter'); if (!modelFilter) return; const records = loadFromStorage('chatlog_records') || []; const uniqueModels = new Set(); records.forEach(record => { if (record.llmName && typeof record.llmName === 'string') uniqueModels.add(record.llmName.trim()); }); const currentModelSelection = modelFilter.value; const allModelOption = modelFilter.options.length > 0 ? modelFilter.options[0].cloneNode(true) : null; modelFilter.innerHTML = ''; if (allModelOption) modelFilter.appendChild(allModelOption); Array.from(uniqueModels).sort().forEach(model => { if (model) { const option = document.createElement('option'); option.value = model; option.textContent = model; modelFilter.appendChild(option); } }); if (Array.from(modelFilter.options).some(opt => opt.value === currentModelSelection)) { modelFilter.value = currentModelSelection; } console.log("Filtros stats poblados."); }
+        function applyStatisticsFilters() { console.log("Aplicando filtros stats..."); const dateRange = document.getElementById('stats-date-range')?.value || 'all'; const projectFilter = document.getElementById('stats-project-filter')?.value || 'all'; const modelFilter = document.getElementById('stats-model-filter')?.value || 'all'; let allRecords = loadFromStorage('chatlog_records') || []; let filteredRecords = [...allRecords]; if (dateRange !== 'all') { const currentDate = new Date(); let startDate; switch (dateRange) { case 'month': startDate = new Date(currentDate); startDate.setMonth(currentDate.getMonth() - 1); break; case 'quarter': startDate = new Date(currentDate); startDate.setMonth(currentDate.getMonth() - 3); break; case 'year': startDate = new Date(currentDate); startDate.setFullYear(currentDate.getFullYear() - 1); break; } if (startDate) { console.log(`Filtrando fecha desde: ${startDate.toISOString()}`); filteredRecords = filteredRecords.filter(record => { try { const recordDate = new Date(record.dateCreated); return recordDate >= startDate; } catch (e) { return false; } }); } } console.log(`Fecha (${dateRange}): ${filteredRecords.length} reg.`); if (projectFilter !== 'all') { if (projectFilter === 'none') { filteredRecords = filteredRecords.filter(record => !record.projectId); } else { filteredRecords = filteredRecords.filter(record => record.projectId === projectFilter); } } console.log(`Proyecto (${projectFilter}): ${filteredRecords.length} reg.`); if (modelFilter !== 'all') { filteredRecords = filteredRecords.filter(record => record.llmName === modelFilter); } console.log(`Modelo (${modelFilter}): ${filteredRecords.length} reg.`); if (filteredRecords.length === 0) { console.log("No hay registros para filtros."); showNoStatsData(); } else { console.log(`Actualizando stats con ${filteredRecords.length} regs.`); updateStatistics(filteredRecords); } }
+        function resetStatisticsFilters() { console.log("Reseteando filtros stats."); document.getElementById('stats-date-range').value = 'all'; document.getElementById('stats-project-filter').value = 'all'; document.getElementById('stats-model-filter').value = 'all'; applyStatisticsFilters(); }
+        function showNoStatsData() { document.getElementById('total-interactions').textContent = '0'; document.getElementById('total-models').textContent = '0'; document.getElementById('total-projects').textContent = '0'; document.getElementById('total-purposes').textContent = '0'; const tableIds = ['models-table', 'purposes-table', 'projects-table-stats']; tableIds.forEach(id => { const tbody = document.querySelector(`#${id} tbody`); if(tbody) tbody.innerHTML = `<tr><td colspan="4" class="no-data-message">Sin datos para filtros</td></tr>`; }); const timeline = document.getElementById('timeline-container'); if(timeline) timeline.innerHTML = '<div class="no-data-message">Sin actividad</div>'; const tagsCloud = document.getElementById('tags-cloud'); if(tagsCloud) tagsCloud.innerHTML = '<div class="no-data-message">Sin etiquetas</div>'; }
+        function updateStatistics(records) { if (!Array.isArray(records) || records.length === 0) { showNoStatsData(); return; } console.log(`Actualizando visualizaciones stats con ${records.length} regs.`); updateStatsSummary(records); updateStatsTable(records, 'llmName', 'models-table', 7); updateStatsTable(records, 'purpose', 'purposes-table', 7); updateProjectsStatsTable(records, 7); updateTimeline(records); updateTagsCloud(records); }
+        function updateStatsSummary(records) { document.getElementById('total-interactions').textContent = records.length; document.getElementById('total-models').textContent = new Set(records.map(r => r.llmName)).size; document.getElementById('total-projects').textContent = new Set(records.filter(r => r.projectId).map(r => r.projectId)).size; document.getElementById('total-purposes').textContent = new Set(records.map(r => r.purpose)).size; }
+        function updateStatsTable(records, property, tableId, topN = null) { const tableBody = document.querySelector(`#${tableId} tbody`); if (!tableBody) return; const counts = {}; records.forEach(record => { const value = record[property] || 'Desconocido'; if (!counts[value]) counts[value] = 0; counts[value]++; }); let sortedItems = Object.entries(counts).sort(([, countA], [, countB]) => countB - countA); if (topN !== null && !isNaN(topN)) sortedItems = sortedItems.slice(0, topN); tableBody.innerHTML = ''; if (sortedItems.length === 0) { tableBody.innerHTML = `<tr><td colspan="4" class="no-data-message">Sin datos</td></tr>`; return; } const colors = ['var(--chart-color-1)', 'var(--chart-color-2)', 'var(--chart-color-3)', 'var(--chart-color-4)', 'var(--chart-color-5)', 'var(--chart-color-6)', 'var(--chart-color-7)', 'var(--chart-color-8)', 'var(--chart-color-9)', 'var(--chart-color-10)']; const totalRecords = records.length; sortedItems.forEach(([item, count], index) => { const percentage = totalRecords > 0 ? ((count / totalRecords) * 100) : 0; const colorIndex = index % colors.length; const row = document.createElement('tr'); const itemCell = document.createElement('td'); itemCell.textContent = item; const countCell = document.createElement('td'); countCell.textContent = count; const percentCell = document.createElement('td'); percentCell.textContent = `${percentage.toFixed(1)}%`; const barCell = document.createElement('td'); const progressBar = document.createElement('div'); progressBar.className = 'progress-bar'; progressBar.setAttribute('title', `${item}: ${count} (${percentage.toFixed(1)}%)`); const progressFill = document.createElement('div'); progressFill.className = 'progress-fill'; progressFill.style.width = '0%'; progressFill.style.backgroundColor = colors[colorIndex]; requestAnimationFrame(() => setTimeout(() => { progressFill.style.width = `${percentage}%`; }, 50)); progressBar.appendChild(progressFill); barCell.appendChild(progressBar); row.appendChild(itemCell); row.appendChild(countCell); row.appendChild(percentCell); row.appendChild(barCell); tableBody.appendChild(row); }); }
+        function updateProjectsStatsTable(records, topN = null) { const tableId = 'projects-table-stats'; const tableBody = document.querySelector(`#${tableId} tbody`); if (!tableBody) return; const projects = loadFromStorage('chatlog_projects') || []; const projectsMap = {}; projects.forEach(project => { projectsMap[project.id] = project.name; }); const projectCounts = {}; records.forEach(record => { const projectId = record.projectId || 'none'; if (!projectCounts[projectId]) projectCounts[projectId] = 0; projectCounts[projectId]++; }); let sortedProjects = Object.entries(projectCounts).sort(([, countA], [, countB]) => countB - countA); if (topN !== null && !isNaN(topN)) sortedProjects = sortedProjects.slice(0, topN); tableBody.innerHTML = ''; if (sortedProjects.length === 0) { tableBody.innerHTML = `<tr><td colspan="4" class="no-data-message">Sin datos</td></tr>`; return; } const colors = ['var(--chart-color-3)', 'var(--chart-color-5)', 'var(--chart-color-1)', 'var(--chart-color-6)', 'var(--chart-color-4)', 'var(--chart-color-2)', 'var(--chart-color-7)', 'var(--chart-color-9)', 'var(--chart-color-8)', 'var(--chart-color-10)']; const totalRecords = records.length; sortedProjects.forEach(([projectId, count], index) => { const percentage = totalRecords > 0 ? ((count / totalRecords) * 100) : 0; const colorIndex = index % colors.length; const projectName = projectId === 'none' ? 'Sin proyecto' : (projectsMap[projectId] || `ID: ${projectId.substring(0,6)}...`); const row = document.createElement('tr'); const projectCell = document.createElement('td'); projectCell.textContent = projectName; const countCell = document.createElement('td'); countCell.textContent = count; const percentCell = document.createElement('td'); percentCell.textContent = `${percentage.toFixed(1)}%`; const barCell = document.createElement('td'); const progressBar = document.createElement('div'); progressBar.className = 'progress-bar'; progressBar.setAttribute('title', `${projectName}: ${count} (${percentage.toFixed(1)}%)`); const progressFill = document.createElement('div'); progressFill.className = 'progress-fill'; progressFill.style.width = '0%'; progressFill.style.backgroundColor = colors[colorIndex]; requestAnimationFrame(() => setTimeout(() => { progressFill.style.width = `${percentage}%`; }, 50)); progressBar.appendChild(progressFill); barCell.appendChild(progressBar); row.appendChild(projectCell); row.appendChild(countCell); row.appendChild(percentCell); row.appendChild(barCell); tableBody.appendChild(row); }); }
+        function updateTimeline(records) { const timelineContainer = document.getElementById('timeline-container'); if (!timelineContainer) return; const recordsByDate = {}; records.forEach(record => { try { const date = new Date(record.dateCreated); if (isNaN(date.getTime())) return; const dateKey = date.toISOString().split('T')[0]; if (!recordsByDate[dateKey]) recordsByDate[dateKey] = 0; recordsByDate[dateKey]++; } catch (e) {} }); const sortedDates = Object.keys(recordsByDate).sort(); timelineContainer.innerHTML = ''; if (sortedDates.length === 0) { timelineContainer.innerHTML = '<div class="no-data-message">Sin actividad</div>'; return; } const counts = Object.values(recordsByDate); const maxCount = counts.length > 0 ? Math.max(...counts) : 1; sortedDates.forEach(dateKey => { const count = recordsByDate[dateKey]; const percentage = maxCount > 0 ? (count / maxCount) * 100 : 0; const timelineItem = document.createElement('div'); timelineItem.className = 'timeline-item'; let formattedDate = dateKey; try { const [y, m, d] = dateKey.split('-'); const date = new Date(parseInt(y), parseInt(m) - 1, parseInt(d)); formattedDate = date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }); } catch(e) {} const dateElement = document.createElement('div'); dateElement.className = 'timeline-date'; dateElement.textContent = formattedDate; const barContainer = document.createElement('div'); barContainer.className = 'timeline-bar-container'; const bar = document.createElement('div'); bar.className = 'timeline-bar'; bar.setAttribute('title', `${formattedDate}: ${count} ${count === 1 ? 'int.' : 'ints.'}`); bar.style.width = '0%'; bar.textContent = count; requestAnimationFrame(() => setTimeout(() => { bar.style.width = `${Math.max(percentage, 1)}%`; }, 50)); barContainer.appendChild(bar); timelineItem.appendChild(dateElement); timelineItem.appendChild(barContainer); timelineContainer.appendChild(timelineItem); }); console.log(`Timeline con ${sortedDates.length} días.`); }
+        function updateTagsCloud(records) { const tagsCloudContainer = document.getElementById('tags-cloud'); if (!tagsCloudContainer) return; const tagCounts = {}; records.forEach(record => { if (record.tags && Array.isArray(record.tags)) record.tags.forEach(tag => { if (tag && typeof tag === 'string') { const cleanTag = tag.trim(); if (cleanTag) { if (!tagCounts[cleanTag]) tagCounts[cleanTag] = 0; tagCounts[cleanTag]++; } } }); }); const sortedTags = Object.entries(tagCounts).sort(([, countA], [, countB]) => countB - countA); const topTags = sortedTags.slice(0, 30); tagsCloudContainer.innerHTML = ''; if (topTags.length === 0) { tagsCloudContainer.innerHTML = '<div class="no-data-message">Sin etiquetas</div>'; return; } const counts = topTags.map(([, count]) => count); const minCount = counts.length > 0 ? Math.min(...counts) : 1; const maxCount = counts.length > 0 ? Math.max(...counts) : 1; const baseFontSize = 13; const maxFontSizeAddition = 15; function calculateFontSize(count) { if (maxCount === minCount) return baseFontSize; const scale = Math.log(count - minCount + 1) / Math.log(maxCount - minCount + 1); return baseFontSize + scale * maxFontSizeAddition; } const colors = ['var(--primary-color)', '#4a00b0', '#6247aa', '#7a5de8', '#5900d9']; topTags.forEach(([tag, count], index) => { const fontSize = calculateFontSize(count); const colorIndex = Math.floor(Math.random() * colors.length); const tagElement = document.createElement('div'); tagElement.className = 'tag-cloud-item'; tagElement.textContent = tag; tagElement.style.fontSize = `${fontSize.toFixed(1)}px`; tagElement.style.backgroundColor = colors[colorIndex]; tagElement.setAttribute('title', `${tag}: ${count} ${count === 1 ? 'uso' : 'usos'}`); tagsCloudContainer.appendChild(tagElement); }); console.log(`Nube etiquetas con ${topTags.length} tags.`); }
+
+        // --- HERRAMIENTAS: EXPORTACIÓN / IMPORTACIÓN --- (Lógica sin cambios funcionales, adaptada a referencias)
+        function exportAllData() { console.log("Exportando JSON..."); try { const data = { records: loadFromStorage('chatlog_records') || [], projects: loadFromStorage('chatlog_projects') || [], metadata: { app: 'ChatLog', version: '1.0', exportDate: new Date().toISOString(), type: 'full_backup' } }; if (data.records.length === 0 && data.projects.length === 0) { alert("No hay datos para exportar."); return; } downloadJSON(data, 'ChatLog_Backup_Completo'); console.log("Exportación JSON iniciada."); } catch (error) { alert("Error preparando exportación JSON."); console.error("Error exportAllData:", error); } }
+        function exportCSV() { console.log("Exportando CSV..."); try { const records = loadFromStorage('chatlog_records') || []; if (records.length === 0) { alert('No hay registros para exportar.'); return; } const projects = loadFromStorage('chatlog_projects') || []; const projectsMap = {}; projects.forEach(project => { projectsMap[project.id] = project.name; }); const headers = [ 'ID_Registro', 'Nombre_Interaccion', 'Finalidad', 'Nombre_LLM', 'Version_LLM', 'Prompt', 'Enlace_Interaccion', 'Etiquetas (Separadas por ;)', 'Notas_Eticas', 'Notas_Mitigacion_Sesgos', 'Otras_Observaciones', 'Calificacion (0-5)', 'ID_Proyecto', 'Nombre_Proyecto', 'Fecha_Creacion', 'Fecha_Modificacion' ]; let csvContent = headers.map(escapeCsvValue).join(',') + '\n'; records.forEach(record => { const projectName = record.projectId ? (projectsMap[record.projectId] || 'ID Desc.') : ''; const tags = Array.isArray(record.tags) ? record.tags.join('; ') : ''; let dateCreatedISO = ''; try { dateCreatedISO = new Date(record.dateCreated).toISOString(); } catch(e){} let dateModifiedISO = ''; try { dateModifiedISO = new Date(record.dateModified).toISOString(); } catch(e){} const row = [ record.id, record.interactionName, record.purpose, record.llmName, record.llmVersion || '', record.prompt, record.interactionLink || '', tags, record.ethicalNotes || '', record.biasNotes || '', record.observations || '', record.rating || '0', record.projectId || '', projectName, dateCreatedISO, dateModifiedISO ]; csvContent += row.map(escapeCsvValue).join(',') + '\n'; }); const blob = new Blob([`\uFEFF${csvContent}`], { type: 'text/csv;charset=utf-8;' }); /* Añadir BOM para Excel */ const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; const dateStr = new Date().toISOString().split('T')[0].replace(/-/g, ''); a.download = `ChatLog_Registros_${dateStr}.csv`; document.body.appendChild(a); a.click(); setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); console.log("Exportación CSV iniciada."); }, 100); } catch (error) { alert("Error preparando exportación CSV."); console.error("Error exportCSV:", error); } }
+        function escapeCsvValue(value) { const stringValue = (value === null || value === undefined) ? '' : String(value); if (stringValue.includes('"') || stringValue.includes(',') || stringValue.includes('\n') || stringValue.includes(';')) { return `"${stringValue.replace(/"/g, '""')}"`; } return stringValue; }
+        function downloadJSON(data, baseFilename) { try { const jsonString = JSON.stringify(data, null, 2); const blob = new Blob([jsonString], { type: 'application/json;charset=utf-8' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; const dateStr = new Date().toISOString().split('T')[0].replace(/-/g, ''); a.download = `${baseFilename}_${dateStr}.json`; document.body.appendChild(a); a.click(); setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100); } catch (error) { alert("Error generando JSON."); console.error("Error downloadJSON:", error); } }
+        function importData() { const fileInput = document.getElementById('import-file'); if (!fileInput || !fileInput.files || fileInput.files.length === 0) { alert('Selecciona archivo JSON.'); return; } const file = fileInput.files[0]; const replaceData = confirm('¿REEMPLAZAR datos actuales con los del archivo? \n\n(Cancelar para FUSIONAR).'); const reader = new FileReader(); reader.onload = function(e) { try { const importedData = JSON.parse(e.target.result); if (!importedData || typeof importedData !== 'object' || !importedData.metadata || importedData.metadata.app !== 'ChatLog') { throw new Error('Archivo no parece ser respaldo válido (falta metadata o formato).'); } console.log(`JSON importado. V: ${importedData.metadata.version}, Tipo: ${importedData.metadata.type}`); let impProjectsCnt = 0, impRecordsCnt = 0; const existingProjects = loadFromStorage('chatlog_projects') || []; let finalProjects = []; if (importedData.projects && Array.isArray(importedData.projects)) { if (replaceData) { finalProjects = importedData.projects; impProjectsCnt = finalProjects.length; console.log(`Reemplazando ${existingProjects.length} proys con ${impProjectsCnt} importados.`); } else { finalProjects = [...existingProjects]; const existingPIds = new Set(existingProjects.map(p => p.id)); const newProjs = importedData.projects.filter(p => !existingPIds.has(p.id)); finalProjects.push(...newProjs); impProjectsCnt = newProjs.length; console.log(`Fusionando proys: ${existingProjects.length} + ${impProjectsCnt} nuevos = ${finalProjects.length}`); } if (impProjectsCnt > 0 || replaceData) if (!saveToStorage('chatlog_projects', finalProjects)) throw new Error("Error guardando proyectos importados."); } else { console.log("No hay proyectos en archivo."); if (replaceData) { saveToStorage('chatlog_projects', []); console.log("Proyectos existentes borrados."); } else finalProjects = existingProjects; } const existingRecords = loadFromStorage('chatlog_records') || []; let finalRecords = []; if (importedData.records && Array.isArray(importedData.records)) { if (replaceData) { finalRecords = importedData.records; impRecordsCnt = finalRecords.length; console.log(`Reemplazando ${existingRecords.length} regs con ${impRecordsCnt} importados.`); } else { finalRecords = [...existingRecords]; const existingRIds = new Set(existingRecords.map(r => r.id)); const newRecs = importedData.records.filter(r => !existingRIds.has(r.id)); finalRecords.push(...newRecs); impRecordsCnt = newRecs.length; console.log(`Fusionando regs: ${existingRecords.length} + ${impRecordsCnt} nuevos = ${finalRecords.length}`); } if (impRecordsCnt > 0 || replaceData) if (!saveToStorage('chatlog_records', finalRecords)) throw new Error("Error guardando registros importados."); } else { console.log("No hay registros en archivo."); if (replaceData) { saveToStorage('chatlog_records', []); console.log("Registros existentes borrados."); } else finalRecords = existingRecords; } console.log("Actualizando UI post-import JSON..."); loadProjects(); loadQuickAccessList(); preloadTabData(); if (document.getElementById('tools')?.classList.contains('active')) loadRecordsForManagement(); if (document.getElementById('stats')?.classList.contains('active')) loadStatistics(); if (document.getElementById('declaration')?.classList.contains('active')) loadRecordsForDeclaration(); updateAllTags(); updateStorageUsage(); fileInput.value = ''; if(document.getElementById('import-data-btn')) document.getElementById('import-data-btn').disabled = true; alert(`Importación JSON ok.\n${replaceData ? 'Reemplazados.' : 'Fusionados.'}\nProys: ${impProjectsCnt}\nRegs: ${impRecordsCnt}`); } catch (error) { console.error('Error importando JSON:', error); alert('Error importando: ' + error.message); if(fileInput) fileInput.value = ''; if(document.getElementById('import-data-btn')) document.getElementById('import-data-btn').disabled = true; } }; reader.onerror = function() { alert('Error leyendo archivo.'); if(fileInput) fileInput.value = ''; if(document.getElementById('import-data-btn')) document.getElementById('import-data-btn').disabled = true; }; reader.readAsText(file); }
+        function previewCSV() { const fileInput = document.getElementById('csv-file'); const previewContainer = document.getElementById('csv-preview-container'); const previewElement = document.getElementById('csv-preview'); const importBtn = document.getElementById('import-csv-btn'); if (!previewContainer || !previewElement || !importBtn) return; if (!fileInput || !fileInput.files || fileInput.files.length === 0) { previewContainer.style.display = 'none'; importBtn.disabled = true; return; } const file = fileInput.files[0]; if (!file.type.match('text/csv') && !file.name.toLowerCase().endsWith('.csv')) { alert('Selecciona archivo CSV.'); previewContainer.style.display = 'none'; fileInput.value = ''; importBtn.disabled = true; return; } const reader = new FileReader(); reader.onload = function(e) { try { const csvContent = e.target.result; const records = parseCSVSimple(csvContent, 5); if (records.length === 0 || !records[0]) { previewElement.innerHTML = '<p class="no-data-message">CSV vacío o sin encabezados.</p>'; previewContainer.style.display = 'block'; importBtn.disabled = true; return; } const headers = Object.keys(records[0]); let tableHtml = '<table><thead><tr>'; headers.forEach(header => { tableHtml += `<th>${escapeHtml(header)}</th>`; }); tableHtml += '</tr></thead><tbody>'; records.forEach(row => { tableHtml += '<tr>'; headers.forEach(header => { tableHtml += `<td>${escapeHtml(row[header] || '')}</td>`; }); tableHtml += '</tr>'; }); tableHtml += '</tbody></table>'; const totalLines = (csvContent.match(/\r\n|\n/g) || []).length; const totalRecordsApproximation = Math.max(0, totalLines -1); if (totalRecordsApproximation > records.length) tableHtml += `<p class="text-muted" style="font-size:0.8em;margin-top:5px;">(Mostrando ${records.length} de ~${totalRecordsApproximation} registros)</p>`; previewElement.innerHTML = tableHtml; previewContainer.style.display = 'block'; importBtn.disabled = false; } catch (error) { console.error('Error preview CSV:', error); previewElement.innerHTML = `<p class="no-data-message" style="color:var(--danger-color);">Error procesando CSV: ${error.message}</p>`; previewContainer.style.display = 'block'; importBtn.disabled = true; } }; reader.onerror = function() { previewElement.innerHTML = '<p class="no-data-message" style="color:var(--danger-color);">Error leyendo archivo.</p>'; previewContainer.style.display = 'block'; importBtn.disabled = true; }; reader.readAsText(file); }
+        function parseCSVSimple(csvContent, maxRows = Infinity) { if (!csvContent) return []; const lines = csvContent.trim().split(/\r\n|\n/); if (lines.length <= 1) return []; const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, '')); if (headers.length === 0 || headers.every(h => !h)) return []; const records = []; for (let i = 1; i < lines.length && records.length < maxRows; i++) { const line = lines[i].trim(); if (!line) continue; const values = []; let currentVal = ''; let inQuotes = false; for (let char of line) { if (char === '"') inQuotes = !inQuotes; else if (char === ',' && !inQuotes) { values.push(currentVal.trim()); currentVal = ''; } else currentVal += char; } values.push(currentVal.trim()); if (values.length !== headers.length) { console.warn(`Línea ${i+1}: Valores (${values.length}) != Encabezados (${headers.length}). Línea: "${line}"`); const simpleValues = line.split(','); if (simpleValues.length === headers.length) { values.length = 0; values.push(...simpleValues.map(v => v.trim())); console.log(`Línea ${i+1}: Re-parseada simple.`); } else { while(values.length < headers.length) values.push(''); values.length = headers.length; } } const record = {}; headers.forEach((header, index) => { let value = values[index] || ''; if (value.startsWith('"') && value.endsWith('"')) value = value.substring(1, value.length - 1); record[header] = value.replace(/""/g, '"'); }); records.push(record); } return records; }
+        function importCSV() { const fileInput = document.getElementById('csv-file'); if (!fileInput || !fileInput.files || fileInput.files.length === 0) { alert('Selecciona archivo CSV.'); return; } if (!confirm('AÑADIR registros del CSV a los existentes?\n\n(Registros con ID existente serán omitidos).\n\nContinuar?')) return; const file = fileInput.files[0]; const reader = new FileReader(); reader.onload = function(e) { try { const csvContent = e.target.result; const csvRecords = parseCSVSimple(csvContent); if (csvRecords.length === 0) { alert('CSV vacío o sin datos.'); return; } console.log(`CSV parseado: ${csvRecords.length} regs.`); const headers = Object.keys(csvRecords[0]); const fieldMapping = mapCsvHeaders(headers); const requiredMappedFields = ['name', 'purpose', 'model']; const missingFields = requiredMappedFields.filter(f => !fieldMapping[f]); if (missingFields.length > 0) { const missingNames = missingFields.map(f => f === 'name' ? "'Nombre'" : f === 'purpose' ? "'Finalidad'" : f === 'model' ? "'Modelo'" : f); alert(`Error: CSV no contiene columnas requeridas:\n- ${missingNames.join('\n- ')}`); return; } const existingRecords = loadFromStorage('chatlog_records') || []; const existingRecordIds = new Set(existingRecords.map(r => r.id)); const newRecordsToAdd = []; let skippedCount = 0; csvRecords.forEach((csvRecord, index) => { const csvId = fieldMapping.id ? csvRecord[fieldMapping.id]?.trim() : null; if (csvId && existingRecordIds.has(csvId)) { skippedCount++; return; } const newRecord = { id: (csvId && !existingRecordIds.has(csvId)) ? csvId : Date.now().toString() + Math.random().toString(36).substring(2, 8), interactionName: csvRecord[fieldMapping.name]?.trim() || `Reg CSV ${index + 1}`, purpose: csvRecord[fieldMapping.purpose]?.trim() || 'Desc.', llmName: csvRecord[fieldMapping.model]?.trim() || 'Desc.', llmVersion: fieldMapping.version ? csvRecord[fieldMapping.version]?.trim() : '', prompt: fieldMapping.prompt ? csvRecord[fieldMapping.prompt]?.trim() : '', interactionLink: fieldMapping.link ? csvRecord[fieldMapping.link]?.trim() : '', tags: fieldMapping.tags ? (csvRecord[fieldMapping.tags]?.split(/[;,]/) || []).map(t => t.trim()).filter(Boolean) : [], ethicalNotes: fieldMapping.ethics ? csvRecord[fieldMapping.ethics]?.trim() : '', biasNotes: fieldMapping.bias ? csvRecord[fieldMapping.bias]?.trim() : '', observations: fieldMapping.notes ? csvRecord[fieldMapping.notes]?.trim() : '', rating: fieldMapping.rating ? String(parseInt(csvRecord[fieldMapping.rating]?.trim()) || 0) : '0', projectId: mapProjectId(fieldMapping.projectName ? csvRecord[fieldMapping.projectName]?.trim() : null), dateCreated: parseCsvDate(fieldMapping.dateCreated ? csvRecord[fieldMapping.dateCreated] : null) || new Date().toISOString(), dateModified: parseCsvDate(fieldMapping.dateModified ? csvRecord[fieldMapping.dateModified] : null) || new Date().toISOString() }; const ratingInt = parseInt(newRecord.rating); if (isNaN(ratingInt) || ratingInt < 0 || ratingInt > 5) newRecord.rating = '0'; newRecordsToAdd.push(newRecord); }); console.log(`${newRecordsToAdd.length} nuevos regs para añadir.`); if (skippedCount > 0) console.log(`${skippedCount} omitidos por ID existente.`); if (newRecordsToAdd.length > 0) { const allRecords = [...existingRecords, ...newRecordsToAdd]; if (saveToStorage('chatlog_records', allRecords)) { console.log("Actualizando UI post-import CSV..."); loadProjects(); loadQuickAccessList(); updateAllTags(); preloadTabData(); if (document.getElementById('tools')?.classList.contains('active')) loadRecordsForManagement(); if (document.getElementById('stats')?.classList.contains('active')) loadStatistics(); if (document.getElementById('declaration')?.classList.contains('active')) loadRecordsForDeclaration(); updateStorageUsage(); let msg = `Importados ${newRecordsToAdd.length} nuevos registros.`; if (skippedCount > 0) msg += `\n(${skippedCount} omitidos por ID ya existente).`; alert(msg); } else alert("Error guardando registros importados CSV."); } else { alert("No se añadieron nuevos registros." + (skippedCount > 0 ? `\n(${skippedCount} omitidos por ID ya existente).` : '')); } if(fileInput) fileInput.value = ''; if(document.getElementById('csv-preview-container')) document.getElementById('csv-preview-container').style.display = 'none'; if(document.getElementById('import-csv-btn')) document.getElementById('import-csv-btn').disabled = true; } catch (error) { console.error('Error importando CSV:', error); alert('Error importando CSV: ' + error.message); if(fileInput) fileInput.value = ''; if(document.getElementById('csv-preview-container')) document.getElementById('csv-preview-container').style.display = 'none'; if(document.getElementById('import-csv-btn')) document.getElementById('import-csv-btn').disabled = true; } }; reader.onerror = function() { alert('Error leyendo archivo CSV.'); if(fileInput) fileInput.value = ''; if(document.getElementById('csv-preview-container')) document.getElementById('csv-preview-container').style.display = 'none'; if(document.getElementById('import-csv-btn')) document.getElementById('import-csv-btn').disabled = true; }; reader.readAsText(file); }
+        function mapCsvHeaders(headers) { const mapping = {}; const mapConfig = { id: ['id', 'id_registro', 'record_id'], name: ['nombre', 'name', 'título', 'title', 'interaccion', 'interaction'], purpose: ['finalidad', 'purpose', 'objetivo', 'goal'], model: ['modelo', 'model', 'llm', 'nombre_llm'], version: ['version', 'versión'], prompt: ['prompt', 'consulta'], link: ['link', 'enlace', 'url', 'liga'], tags: ['tags', 'etiquetas', 'keywords', 'palabras_clave'], ethics: ['etica', 'ethics', 'ethical', 'notas_eticas'], bias: ['sesgo', 'bias', 'mitigacion', 'riesgos', 'notas_sesgo'], notes: ['observaciones', 'observations', 'notas', 'notes', 'otras_observaciones'], rating: ['calificacion', 'rating', 'puntuacion', 'score', 'estrellas', 'stars'], projectName: ['proyecto', 'project', 'nombre_proyecto'], dateCreated: ['fecha_creacion', 'date_created', 'created_at'], dateModified: ['fecha_modificacion', 'date_modified', 'updated_at', 'fecha'] }; headers.forEach(header => { const headerLower = header.toLowerCase().replace(/ /g, '_'); for (const internalField in mapConfig) { if (!mapping[internalField] && mapConfig[internalField].some(term => headerLower.includes(term))) { mapping[internalField] = header; break; } } }); console.log("Mapeo CSV:", mapping); return mapping; }
+        function parseCsvDate(dateString) { if (!dateString) return null; try { const date = new Date(dateString); if (!isNaN(date.getTime())) return date.toISOString(); } catch (e) {} return null; }
+        function mapProjectId(projectName) { if (!projectName) return null; const projects = loadFromStorage('chatlog_projects') || []; const projectNameLower = projectName.toLowerCase(); const existingProject = projects.find(p => p.name.toLowerCase() === projectNameLower); if (existingProject) return existingProject.id; console.log(`Proyecto "${projectName}" no encontrado, creando uno nuevo...`); const newProject = { id: Date.now().toString() + Math.random().toString(36).substring(2, 8), name: projectName, dateCreated: new Date().toISOString() }; projects.push(newProject); if (saveToStorage('chatlog_projects', projects)) { console.log(`Nuevo proy "${projectName}" ID ${newProject.id} creado desde CSV.`); return newProject.id; } else { console.error(`Error creando proy "${projectName}" desde CSV.`); return null; } }
+        function escapeHtml(unsafe) { if (unsafe === null || unsafe === undefined) return ''; return String(unsafe).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); }
+
+        // === FIN DEL CONTENIDO DE SCRIPT.JS ===
+    </script>
+
+</body>
+</html>
